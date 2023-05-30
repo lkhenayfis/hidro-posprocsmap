@@ -22,12 +22,12 @@ ledados <- function(subbacia) {
 #' Leitura dos parametros calibrados para uma determinada subbacia
 #' 
 #' @param subbacia codigo no banco da subbacia a ser lida
-#' @param conn conexao com o banco de onde ler
 #' 
 #' @return lista dos parametros do SMAP
 
-le_parametros <- function(subbacia, conn) {
+le_parametros <- function(subbacia) {
     idsb <- getfromtabela(.DB_SCHEMA$subbacias, codigo = subbacia)$id
+    conn <- .DB_SCHEMA$conn
 
     if(class(conn)[1] == "local") {
         params <- jsonlite::read_json(file.path(conn[[1]], "parametros.json"), simplifyVector = TRUE)
