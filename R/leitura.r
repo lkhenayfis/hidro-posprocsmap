@@ -32,7 +32,8 @@ le_parametros <- function(subbacia) {
     if(class(conn)[1] == "local") {
         params <- jsonlite::read_json(file.path(conn[[1]], "parametros.json"), simplifyVector = TRUE)
     } else if(class(conn)[1] == "buckets3") {
-        params <- aws.s3::s3read_using(jsonlite::read_json, simplifyVector = TRUE, object = x, bucket = conn[[1]])
+        params <- aws.s3::s3read_using(jsonlite::read_json, simplifyVector = TRUE,
+            object = file.path(conn[[1]], "parametros.json"))
     }
 
     params <- params[unlist(lapply(params, "[[", "id_subbacia")) == idsb]
