@@ -20,7 +20,7 @@ aplicakts <- function(x, pesos, pad = FALSE) {
         out <- c(rep(NA_real_, N - 3), out)
     } else {
         out <- zoo::rollapply(x, N, function(v) weighted.mean(v, pesos), align = "center")
-        out <- c(rep(NA_real_, N - 3), out)
+        out <- c(rep(NA_real_, N - 3), out, rep(NA_real_, 2))
     }
     return(out)
 }

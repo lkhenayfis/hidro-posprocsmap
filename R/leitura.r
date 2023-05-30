@@ -71,7 +71,7 @@ le_psat <- function(subbacia, janela = "*", retorna.extra = c("postos", "comb_es
     psat <- dcast(psat[, .(data, codigo, precipitacao)], data ~ codigo, value.var = "precipitacao")
     psat <- merge(psat, psatmedio)
 
-    parametros <- le_parametros(subbacia, .DB_SCHEMA$conn)[[1]]
+    parametros <- le_parametros(subbacia)[[1]]
     psat[, precipitacao2 := aplicakts(precipitacao, parametros$kt)]
 
     mantem <- "precipitacao2"
