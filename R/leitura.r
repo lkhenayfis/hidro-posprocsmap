@@ -5,20 +5,6 @@ library(data.table)
 
 source("R/utils.r")
 
-#' Le Dados De Uma Subbacia
-#' 
-#' Le todos os dados pertinentes a uma subbacia especifica, compondo a prec media de acordo
-#' 
-#' @param subbacia nome da subbacia (em caixa alta de acordo com os codigos do banco)
-#' 
-#' @return lista contendo todos os dados relevantes contidos no banco
-
-ledados <- function(subbacia) {
-    NA
-}
-
-# AUXILIARES ---------------------------------------------------------------------------------------
-
 #' Le Parametros Do SMAP
 #' 
 #' Leitura dos parametros calibrados para uma determinada subbacia
