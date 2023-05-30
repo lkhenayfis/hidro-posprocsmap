@@ -29,9 +29,9 @@ le_parametros <- function(subbacia) {
     return(params)
 }
 
-#' Le PSAT
+#' Leitores De Dados Do Banco
 #' 
-#' Leitura do PSAT no banco, combinando espacial e temporalmente
+#' Funcoes individuais para acesso das informacoes armazenadas no banco
 #' 
 #' Esta funcao sempre retornara, no minimo, o PSAT canonico utilizado pelo SMAP em sua rodada, isto 
 #' e, a chuva combinada entre postos e ao longo do tempo segundo kts. Alem disso, atraves do 
@@ -46,8 +46,10 @@ le_parametros <- function(subbacia) {
 #' @param subbacia codigo no banco da subbacia a ser lida
 #' @param retorna.extra um vetor de strings indicando o que deve ser retornado. Deve conter um ou
 #'     mais de \code{c("postos", "comb_espaco")}. Ver Detalhes
+#' @param modelo codigo no banco do modelo de cujos resultados deve ser lido. Default "PMEDIA"
+#' @param horizonte vetor de horizontes a ler. Default 1:10
 #' 
-#' @return data.table contendo as saidas especificadas de PSAT
+#' @return data.table contendo os dados requisitados
 
 le_psat <- function(subbacia, retorna.extra = c("postos", "comb_espaco")) {
     psat    <- getfromtabela(.DB_SCHEMA$psat, subbacia = subbacia)
@@ -71,41 +73,16 @@ le_psat <- function(subbacia, retorna.extra = c("postos", "comb_espaco")) {
     return(psat)
 }
 
-#' Le Vazoes Observadas
-#' 
-#' Leitura no banco dos dados de vazao observada para uma dada subbacia
-#' 
-#' @param subbacia codigo no banco da subbacia a ser lida
-#' 
-#' @return data.table contendo as vazoes da subbacia especificada
-
 le_vazoes <- function(subbacia) {
     vazoes <- getfromtabela(.DB_SCHEMA$vazoes, subbacia = subbacia)
     return(vazoes)
 }
 
-#' Le Assimilacao
-#' 
-#' Leitura no banco dos dados dos dados de assimilacao
-#' 
-#' @param subbacia codigo no banco da subbacia a ser lida
-#' 
-#' @return data.table contendo as variaveis de assimilacao da subbacia especificada
 
 le_assimilacao <- function(subbacia) {
     assimilacao <- getfromtabela(.DB_SCHEMA$assimilacao, subbacia = subbacia)
     return(assimilacao)
 }
-
-#' Le Previstos
-#' 
-#' Leitura no banco dos dados dos dados previstos
-#' 
-#' @param subbacia codigo no banco da subbacia a ser lida
-#' @param modelo codigo no banco do modelo de cujos resultados deve ser lido. Default "PMEDIA"
-#' @param horizonte vetor de horizontes a ler. Default 1:10
-#' 
-#' @return data.table contendo as variaveis de previsao da subbacia e modelo especificados
 
 le_previstos <- function(subbacia, modelo = "PMEDIA", horizonte = seq_len(10)) {
     previstos <- getfromtabela(.DB_SCHEMA$previstos, subbacia = subbacia, modelo = modelo,
