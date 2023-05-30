@@ -82,12 +82,15 @@ le_psat <- function(subbacia, retorna.extra = c("postos", "comb_espaco")) {
     return(psat)
 }
 
-#' Le Dados Verificados
+#' Le Vazoes Observadas
 #' 
-#' Leitura no banco dos dados verificados de uma determinada subbacia
+#' Leitura no banco dos dados de vazao observada para uma dada subbacia
+#' 
+#' @param subbacia codigo no banco da subbacia a ser lida
+#' 
+#' @return data.table contendo as vazoes da subbacia especificada
 
-le_verificado <- function(subbacia, retorna.psat = c("postos", "comb_espaco", "comb_tempo")) {
+le_vazoes <- function(subbacia) {
     vazoes <- getfromtabela(.DB_SCHEMA$vazoes, subbacia = subbacia)
-    psat   <- 
-    return(out)
+    return(vazoes)
 }
