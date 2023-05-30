@@ -3,6 +3,8 @@
 library(dbrenovaveis)
 library(data.table)
 
+source("R/utils.r")
+
 #' Le Dados De Uma Subbacia
 #' 
 #' Le todos os dados pertinentes a uma subbacia especifica, compondo a prec media de acordo
