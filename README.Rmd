@@ -1,0 +1,50 @@
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+source(".Rprofile")
+.DB_SCHEMA$conn <- conectalocal("data")
+source("R/leitura.r")
+```
+
+# posprocsmap
+
+Este repositorio contem o ferramental para estudo de motodologias de pos processamento de diferentes 
+previsoes de vazao diaria. Aqui se encontram facilitadores da leitura dos dados
+organizados em um bucket s3, implementacoes de modelos para pos processamento e execucoes em janela 
+movel para avaliacao de desempenho passado.
+
+
+## Leitura dos dados
+
+Ha diversas funcoes de leitura para aquisicao dos dados no bucket:
+
+* le_parametros
+* le_psat
+* le_previstos
+* le_vazoes
+* le_assimilacao
+
+Cada uma delas acessa um tipo especifico de dado, indicado pelo nome. Todas elas retornam 
+`data.table`s com o dado requisitado, exceto por `le_parametros` que retorna uma lista. A seguir
+encontram-se exemplos de uso. Deve ser notado que **todas as sub-bacias sao referenciadas por seu 
+codigo em caixa alta**.
+
+Para leitura de parametros calibrados:
+
+```{r, results='as.is'}
+# Para a subbacia AVERMELHA
+params <- le_parametros("AVERMELHA")
+str(params)
+```
+
+Leitura de dados tabelados (por exemplo o previsto):
+
+```{r, results='as.is'}
+# Para a subbacia AVERMELHA nos horizontes D+1 a D+5
+prevs <- le_previstos("AVERMELHA", horizonte = seq_len(3))
+print(prevs)
+```
