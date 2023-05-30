@@ -19,7 +19,7 @@ with(.DB_SCHEMA, {
 
     library(dbrenovaveis)
 
-    conn <- conectalocal("data")
+    conn <- conectabucket("s3://ons-pem-historico", "hidro/meta-smap")
 
     subbacias <- new_tabela(
         nome = "subbacias",
