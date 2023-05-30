@@ -328,7 +328,7 @@
       "RemoteRepo": "dbrenovaveis",
       "RemoteUsername": "lkhenayfis",
       "RemoteRef": "genbackend",
-      "RemoteSha": "2dfb7fe95cfcc7faa358e45194f2352c7a4f420e",
+      "RemoteSha": "9d54f1fa1f9adce2e41a87e2bfec4516290e09db",
       "Requirements": [
         "DBI",
         "R",
@@ -336,7 +336,7 @@
         "data.table",
         "jsonlite"
       ],
-      "Hash": "dd2f5c5614239f8f8b388a61b62465b2"
+      "Hash": "e2b7779bb35fa922d6304280f1018769"
     },
     "desc": {
       "Package": "desc",
