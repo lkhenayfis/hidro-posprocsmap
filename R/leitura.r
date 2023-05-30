@@ -94,3 +94,32 @@ le_vazoes <- function(subbacia) {
     vazoes <- getfromtabela(.DB_SCHEMA$vazoes, subbacia = subbacia)
     return(vazoes)
 }
+
+#' Le Assimilacao
+#' 
+#' Leitura no banco dos dados dos dados de assimilacao
+#' 
+#' @param subbacia codigo no banco da subbacia a ser lida
+#' 
+#' @return data.table contendo as variaveis de assimilacao da subbacia especificada
+
+le_assimilacao <- function(subbacia) {
+    assimilacao <- getfromtabela(.DB_SCHEMA$assimilacao, subbacia = subbacia)
+    return(assimilacao)
+}
+
+#' Le Previstos
+#' 
+#' Leitura no banco dos dados dos dados previstos
+#' 
+#' @param subbacia codigo no banco da subbacia a ser lida
+#' @param modelo codigo no banco do modelo de cujos resultados deve ser lido. Default "PMEDIA"
+#' @param horizonte vetor de horizontes a ler. Default 1:10
+#' 
+#' @return data.table contendo as variaveis de previsao da subbacia e modelo especificados
+
+le_previstos <- function(subbacia, modelo = "PMEDIA", horizonte = seq_len(10)) {
+    previstos <- getfromtabela(.DB_SCHEMA$previstos, subbacia = subbacia, modelo = modelo,
+        dia_previsao = horizonte)
+    return(previstos)
+}
