@@ -33,6 +33,14 @@ le_parametros <- function(subbacia) {
 #' 
 #' Funcoes individuais para acesso das informacoes armazenadas no banco
 #' 
+#' A especificacao de datas segue um padrao similar aquele definido no pacote "xts". Ha duas partes
+#' na janela, antes e depois da "/", que representam o inicio e final da janela de interesse. Caso
+#' alguma dessas partes seja mais simples do que um POSIX completo, pode ser simplificada para 
+#' apenas o necessario. Se for possivel representar a janela com apenas uma das partes, como por 
+#' exemplo o ano 2020, ele pode ser informado sem uso da "/". Finalmente, se for utilizada a "/" e
+#' uma das partes for omitida, entende-se que se buscam todos os dados a partir da inicial (se a 
+#' final) e omitida e vice-versa.
+#' 
 #' Esta funcao sempre retornara, no minimo, o PSAT canonico utilizado pelo SMAP em sua rodada, isto 
 #' e, a chuva combinada entre postos e ao longo do tempo segundo kts. Alem disso, atraves do 
 #' argumento \code{retorna.extra} podem ser especificadas outras variaveis de saida. As opcoes de
@@ -44,6 +52,8 @@ le_parametros <- function(subbacia) {
 #' }
 #' 
 #' @param subbacia codigo no banco da subbacia a ser lida
+#' @param janela janela de datas que devem ser buscadas no formato 
+#'     "YYYY-MM-DD HH:MM:SS/YYYY-MM-DD HH:MM:SS". Ver Detalhes
 #' @param retorna.extra um vetor de strings indicando o que deve ser retornado. Deve conter um ou
 #'     mais de \code{c("postos", "comb_espaco")}. Ver Detalhes
 #' @param modelo codigo no banco do modelo de cujos resultados deve ser lido. Default "PMEDIA"
@@ -51,8 +61,8 @@ le_parametros <- function(subbacia) {
 #' 
 #' @return data.table contendo os dados requisitados
 
-le_psat <- function(subbacia, retorna.extra = c("postos", "comb_espaco")) {
-    psat    <- getfromtabela(.DB_SCHEMA$psat, subbacia = subbacia)
+le_psat <- function(subbacia, janela = "*", retorna.extra = c("postos", "comb_espaco")) {
+    psat    <- getfromtabela(.DB_SCHEMA$psat, data = janela, subbacia = subbacia)
     postos  <- getfromtabela(.DB_SCHEMA$postosplu, subbacia = subbacia)
 
     psat      <- merge(psat, postos[, .(id, codigo, peso)], by.x = "id_postoplu", by.y = "id")
@@ -73,19 +83,18 @@ le_psat <- function(subbacia, retorna.extra = c("postos", "comb_espaco")) {
     return(psat)
 }
 
-le_vazoes <- function(subbacia) {
-    vazoes <- getfromtabela(.DB_SCHEMA$vazoes, subbacia = subbacia)
+le_vazoes <- function(subbacia, janela = "*") {
+    vazoes <- getfromtabela(.DB_SCHEMA$vazoes, data = janela, subbacia = subbacia)
     return(vazoes)
 }
 
-
-le_assimilacao <- function(subbacia) {
-    assimilacao <- getfromtabela(.DB_SCHEMA$assimilacao, subbacia = subbacia)
+le_assimilacao <- function(subbacia, janela = "*") {
+    assimilacao <- getfromtabela(.DB_SCHEMA$assimilacao, data_previsao = janela, subbacia = subbacia)
     return(assimilacao)
 }
 
-le_previstos <- function(subbacia, modelo = "PMEDIA", horizonte = seq_len(10)) {
-    previstos <- getfromtabela(.DB_SCHEMA$previstos, subbacia = subbacia, modelo = modelo,
-        dia_previsao = horizonte)
+le_previstos <- function(subbacia, janela = "*", modelo = "PMEDIA", horizonte = seq_len(10)) {
+    previstos <- getfromtabela(.DB_SCHEMA$previstos, data_previsao = janela, subbacia = subbacia,
+        modelo = modelo, dia_previsao = horizonte)
     return(previstos)
 }
