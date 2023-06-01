@@ -67,7 +67,7 @@ with(.DB_SCHEMA, {
         nome = "assimilacao",
         campos = list(
             new_campo("id_subbacia", "inteiro", TRUE, subbacias, "id", "codigo", "subbacia"),
-            new_campo("data_previsao", "data", alias = "janela"),
+            new_campo("data", "data", alias = "janela"),
             new_campo("dia_assimilacao", "inteiro"),
             new_campo("rsolo", "float"),
             new_campo("rsub", "float"),
