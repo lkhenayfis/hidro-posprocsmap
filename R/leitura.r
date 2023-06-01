@@ -89,7 +89,7 @@ le_vazoes <- function(subbacia, janela = "*") {
 }
 
 le_assimilacao <- function(subbacia, janela = "*") {
-    assimilacao <- getfromtabela(.DB_SCHEMA$assimilacao, data_previsao = janela, subbacia = subbacia)
+    assimilacao <- getfromtabela(.DB_SCHEMA$assimilacao, data = janela, subbacia = subbacia)
     return(assimilacao)
 }
 
