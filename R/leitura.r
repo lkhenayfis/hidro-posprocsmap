@@ -96,5 +96,6 @@ le_assimilacao <- function(subbacia, janela = "*") {
 le_previstos <- function(subbacia, janela = "*", modelo = "PMEDIA", horizonte = seq_len(10)) {
     previstos <- getfromtabela(.DB_SCHEMA$previstos, data_previsao = janela, subbacia = subbacia,
         modelo = modelo, dia_previsao = horizonte)
+    previstos[, data_execucao := data - dia_previsao]
     return(previstos)
 }
