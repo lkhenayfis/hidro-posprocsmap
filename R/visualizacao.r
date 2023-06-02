@@ -18,6 +18,7 @@ library(ggExt)
 #' 
 #' @param dado o dado contendo as series a plotar e uma coluna de datas as indexando
 #' @param variaveis vetor de strings com os nomes das variaveis a serem plotadas
+#' @param coldata coluna com as datas para indexacao. Caso omitido, tenta advinhar pelo dado
 #' @param janela janela de dados a plotar no formato xts
 #' @param by vetor de nomes de colunas pelas quais facetar. Ver Detalhes
 #' @param facet booleano indicando se o plot deve ser facetado ou nao. Ver Detalhes
@@ -30,7 +31,7 @@ library(ggExt)
 #' 
 #' @return objeto ggplot contendo o grafico gerado
 
-plota_serie <- function(dado, variaveis, janela, by = NULL, facet = TRUE) {
+plota_serie <- function(dado, variaveis, coldata, janela, by = NULL, facet = TRUE) {
     if(missing("variaveis")) stop("forneca ao menos um nome de coluna para plot")
 
     if(missing("janela")) janela <- "1000/3000"
@@ -38,7 +39,7 @@ plota_serie <- function(dado, variaveis, janela, by = NULL, facet = TRUE) {
     janela <- c(janela[[1]][1], janela[[2]][2])
     janela <- lapply(janela, as.Date)
 
-    coldata <- colnames(dado)[which(sapply(dado, class) == "Date")]
+    if(missing("coldata")) coldata <- colnames(dado)[which(sapply(dado, class) == "Date")][1]
 
     dplot <- dado[(dado[[coldata]] >= janela[[1]]) & (dado[[coldata]] < janela[[2]]), .SD,
         .SDcols = c(coldata, variaveis, by)]
