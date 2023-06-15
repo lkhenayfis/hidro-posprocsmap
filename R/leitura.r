@@ -17,9 +17,9 @@ le_parametros <- function(subbacia) {
     idsb <- getfromtabela(.DB_SCHEMA$subbacias, codigo = subbacia)$id
     conn <- .DB_SCHEMA$conn
 
-    if(class(conn)[1] == "local") {
+    if (class(conn)[1] == "local") {
         params <- jsonlite::read_json(file.path(conn[[1]], "parametros.json"), simplifyVector = TRUE)
-    } else if(class(conn)[1] == "buckets3") {
+    } else if (class(conn)[1] == "buckets3") {
         params <- aws.s3::s3read_using(jsonlite::read_json, simplifyVector = TRUE,
             object = file.path(conn[[1]], "parametros.json"))
     }
@@ -43,7 +43,7 @@ le_parametros <- function(subbacia) {
 #' 
 #' Esta funcao sempre retornara, no minimo, o PSAT canonico utilizado pelo SMAP em sua rodada, isto 
 #' e, a chuva combinada entre postos e ao longo do tempo segundo kts. Alem disso, atraves do 
-#' argumento \code{retorna.extra} podem ser especificadas outras variaveis de saida. As opcoes de
+#' argumento \code{retorna_extra} podem ser especificadas outras variaveis de saida. As opcoes de
 #' retorno extra sao
 #' 
 #' \describe{
@@ -54,14 +54,14 @@ le_parametros <- function(subbacia) {
 #' @param subbacia codigo no banco da subbacia a ser lida
 #' @param janela janela de datas que devem ser buscadas no formato 
 #'     "YYYY-MM-DD HH:MM:SS/YYYY-MM-DD HH:MM:SS". Ver Detalhes
-#' @param retorna.extra um vetor de strings indicando o que deve ser retornado. Deve conter um ou
+#' @param retorna_extra um vetor de strings indicando o que deve ser retornado. Deve conter um ou
 #'     mais de \code{c("postos", "comb_espaco")}. Ver Detalhes
 #' @param modelo codigo no banco do modelo de cujos resultados deve ser lido. Default "PMEDIA"
 #' @param horizonte vetor de horizontes a ler. Default 1:10
 #' 
 #' @return data.table contendo os dados requisitados
 
-le_psat <- function(subbacia, janela = "*", retorna.extra = c("postos", "comb_espaco")) {
+le_psat <- function(subbacia, janela = "*", retorna_extra = c("postos", "comb_espaco")) {
     psat    <- getfromtabela(.DB_SCHEMA$psat, data = janela, subbacia = subbacia)
     postos  <- getfromtabela(.DB_SCHEMA$postosplu, subbacia = subbacia)
 
@@ -75,8 +75,8 @@ le_psat <- function(subbacia, janela = "*", retorna.extra = c("postos", "comb_es
     psat[, precipitacao2 := aplicakts(precipitacao, parametros$kt)]
 
     mantem <- "precipitacao2"
-    if("comb_espaco" %in% retorna.extra) mantem <- c("precipitacao", mantem)
-    if("postos" %in% retorna.extra) mantem <- c(postos$codigo, mantem)
+    if ("comb_espaco" %in% retorna_extra) mantem <- c("precipitacao", mantem)
+    if ("postos" %in% retorna_extra) mantem <- c(postos$codigo, mantem)
 
     psat <- psat[, .SD, .SDcols = c("data", mantem)]
 

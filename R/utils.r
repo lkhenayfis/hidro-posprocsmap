@@ -14,7 +14,7 @@
 
 aplicakts <- function(x, pesos, pad = FALSE) {
     N <- length(pesos)
-    if(pad) {
+    if (pad) {
         x <- c(x, rep(mean(x), 2))
         out <- zoo::rollapply(x, N, function(v) weighted.mean(v, pesos), align = "center")
         out <- c(rep(NA_real_, N - 3), out)

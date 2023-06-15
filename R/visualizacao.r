@@ -32,14 +32,14 @@ library(ggExt)
 #' @return objeto ggplot contendo o grafico gerado
 
 plota_serie <- function(dado, variaveis, coldata, janela, by = NULL, facet = TRUE) {
-    if(missing("variaveis")) stop("forneca ao menos um nome de coluna para plot")
+    if (missing("variaveis")) stop("forneca ao menos um nome de coluna para plot")
 
-    if(missing("janela")) janela <- "1000/3000"
+    if (missing("janela")) janela <- "1000/3000"
     janela <- dbrenovaveis:::parsedatas(janela, "", FALSE)
     janela <- c(janela[[1]][1], janela[[2]][2])
     janela <- lapply(janela, as.Date)
 
-    if(missing("coldata")) coldata <- colnames(dado)[which(sapply(dado, class) == "Date")][1]
+    if (missing("coldata")) coldata <- colnames(dado)[which(sapply(dado, class) == "Date")][1]
 
     dplot <- dado[(dado[[coldata]] >= janela[[1]]) & (dado[[coldata]] < janela[[2]]), .SD,
         .SDcols = c(coldata, variaveis, by)]
@@ -48,11 +48,11 @@ plota_serie <- function(dado, variaveis, coldata, janela, by = NULL, facet = TRU
 
     gg <- ggplot(dplot, aes(X, valor)) + labs(x = coldata) + theme_bw()
 
-    if(!is.null(by)) {
+    if (!is.null(by)) {
         hasby <- TRUE
         byexpr <- as.formula(paste0("~ ", paste0(by, collapse = " + ")))
         gg <- gg + geom_line(aes(color = variavel)) + facet_wrap(byexpr, dir = "v")
-    } else if(facet) {
+    } else if (facet) {
         gg <- gg + geom_line() + facet_wrap(~ variavel, dir = "v")
     } else {
         gg <- gg + geom_line(aes(color = variavel))
