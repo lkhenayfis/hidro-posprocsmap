@@ -12,9 +12,9 @@
 
 ####################################################################################################
 
-# SARIMA SIMPLES -----------------------------------------------------------------------------------
+# MODELOS ARMA -------------------------------------------------------------------------------------
 
-SARIMA <- function(erros, vazoes, previstos, assimilados,
+ARMA_RAW <- function(erros, vazoes, previstos, assimilados,
     janela, passo, n.ahead, refit.cada) {
 
     serie <- ts(erros$erro)

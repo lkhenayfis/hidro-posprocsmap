@@ -32,8 +32,8 @@
     // indicando um tipo de modelo suportado na aplicacao (ver R/modelos.r). Os elementos seguintes
     // devem representar os argumentos passados a funcao de janelamovel correspondente a "tipo"
     "MODELOS": {
-        "sarima_raw_30": {
-            "tipo": "SARIMA", "janela": 30, "refit.cada": 10, "passo": 1
+        "arma_raw_30": {
+            "tipo": "ARMA_RAW", "janela": 30, "refit.cada": 10, "passo": 1
         }
     },
 
