@@ -24,3 +24,45 @@ aplicakts <- function(x, pesos, pad = FALSE) {
     }
     return(out)
 }
+
+#' Expansao De Subset
+#' 
+#' Funcoes para expandir string de janela no formato dbrenovaveis para lista de datas
+#' 
+#' @param subset uma string indicando faixa de datas no formato dbrenovaveis
+#' 
+#' @return lista de contendo o intervalo de datas do subset [data_ini, data_fim)
+
+expande_subset <- function(subset = NULL) {
+    if (!is.null(subset)) {
+        subset <- dbrenovaveis:::parsedatas(subset, "", FALSE)
+        subset <- list(subset[[1]][1], subset[[2]][2])
+    } else {
+        subset <- list(dbrenovaveis:::expandedatahora("1000")[1],
+            dbrenovaveis:::expandedatahora("3000")[2])
+    }
+    subset <- lapply(subset, function(x) as.Date(as.character(x)))
+
+    return(subset)
+}
+
+#' Aplica Subset De Datas
+#' 
+#' Aplica um \code{subset} de datahoras em um dado
+#' 
+#' @param dat data.table contendo uma coluna de datahora na qual aplicar subset
+#' @param subset uma string indicando faixa de datas no formato dbrenovaveis
+#' @param col_datahora nome da coluna de datahora
+#' 
+#' @return dado \code{dat} subsetado
+
+aplica_subset <- function(dat, subset, col_datahora = "data_hora") {
+    subset <- expande_subset(subset)
+    expr <- paste0(col_datahora, c(" >= subset[[1]]", " < subset[[2]]"))
+    expr <- lapply(expr, str2lang)
+    sub <- lapply(expr, function(e) eval(e, envir = dat))
+    sub <- Reduce("&", sub)
+    dat <- dat[sub]
+
+    return(dat)
+}
