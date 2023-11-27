@@ -47,7 +47,8 @@ with(.DB_SCHEMA, {
         nome = "modelos",
         campos = list(
             new_campo("id", "inteiro"),
-            new_campo("nome", "string")
+            new_campo("nome", "string"),
+            new_campo("horizonte_previsao", "inteiro")
         ),
         conexao = conn
     )
