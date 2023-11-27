@@ -17,8 +17,9 @@
 ARMA_RAW <- function(erros, vazoes, previstos, assimilados,
     janela, passo, n.ahead, refit.cada) {
 
-    serie <- ts(erros$erro)
-    jm    <- janelamovel(serie, "sarima", janela, passo, n.ahead, refit.cada)
+    serie <- ts(erros[dia_previsao == max(dia_previsao)]$erro)
+    jm    <- janelamovel(serie, "sarima", janela, passo, n.ahead, refit.cada,
+        max.d = 0, allowdrift = FALSE)
 
     return(jm)
 }
