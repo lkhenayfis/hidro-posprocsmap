@@ -1,0 +1,49 @@
+{
+    // Nome do estudo, serve como identificador no salvamento de resultados. Se vazio sera gerada 
+    // uma hash do arquivo de configuracao para este uso
+    "NOME": "DEFAULT",
+
+    // Subdiretorio de out/corrigidos onde salvar os arquivos de vento corrigido. Se nao existir
+    // sera criado
+    "OUTDIR": "usinas_meta",
+
+    // Parametros gerais do estudo, a respeito de quais historicos serao corrigidos
+    "PARAMETROS": {
+
+        // Vetor de caracteres indicando quais elementos (usinas, pontos, etc) devem ser rodados.
+        // Vazio roda todos os disponiveis
+        "elementos": ["AVERMELHA"],
+        
+        // Modelos de chuva prevista que originam as previsoes a serem pos processadas
+        // Vazio roda todos os disponiveis
+        "modelos": "PMEDIA",
+
+        // Horizontes de previsao a corrigir. Pode ser uma lista de arrays, indicando horizontes
+        // por modelos
+        // Vazio usa todos os disponivies
+        "horizontes": [1, 2, 3, 4, 5, 6, 7, 8],
+
+        // Datas a utilizar na correcao historica. Deve ser informada no formato de datas 
+        // considerado em `dbrenovaveis`, i.e. DATAHORA/DATAHORA
+        "janela": "2019-01/2021-10"
+    },
+
+    // Modelos de correcao para rodar nos dados. Devem ser listas contendo um elemento "tipo"
+    // indicando um tipo de modelo suportado na aplicacao (ver R/modelos.r). Os elementos seguintes
+    // devem representar os argumentos passados a funcao de janelamovel correspondente a "tipo"
+    "MODELOS": {
+        "sarima_raw_30": {
+            "tipo": "SARIMA", "janela": 30, "refit.cada": 10, "passo": 1
+        }
+    },
+
+    // Parametrizacao da execucao em serie ou paralelo
+    "PARALLEL": {
+
+        // booleano indicando se a correcao historica deve ser executada em paralelo
+        "doparallel": false,
+
+        // numero de threads nos quais paralelizar, caso doparallel seja true
+        "nthreads": 6
+    }
+}
