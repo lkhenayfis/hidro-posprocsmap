@@ -28,6 +28,19 @@
         "janela": "2019-01/2021-10"
     },
 
+    // Parametrizacao de transformacao a ser utilizada no erro. Duas alternativas existem:
+    //     - "identidade": usa o erro bruto calculado
+    //     - "boxcox_simples": aplica transformacao Box-Cox ao erro bruto
+    // Caso a transformacao seja diferente de "identidade", deve existir uma chave "janela" 
+    // indicando a janela de dados in-sample na qual estimar quaisquer parametros de transformacao,
+    // como por exemplo o lambda da transformada de BoxCox
+    // Em qualquer caso a serie modelada sera escalonada p media 0 e sd 1
+    "TRANSFORMACAO": {
+        "tipo": "identidade",
+        "parametros": {},
+        "janela": null
+    },
+
     // Modelos de correcao para rodar nos dados. Devem ser listas contendo um elemento "tipo"
     // indicando um tipo de modelo suportado na aplicacao (ver R/modelos.r). Os elementos seguintes
     // devem representar os argumentos passados a funcao de janelamovel correspondente a "tipo"
