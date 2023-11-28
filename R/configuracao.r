@@ -5,7 +5,7 @@
 #' 
 #' @param arq caminho para um json de configuracao
 
-le_conf_posproc_diario <- function(arq_conf, log = FALSE, print = FALSE) {
+le_conf_posproc_diario <- function(arq_conf, log = FALSE, print = FALSE, early = FALSE) {
 
     if (grepl("\\.(rds)$", arq_conf)) return(readRDS(arq_conf))
 
@@ -16,8 +16,10 @@ le_conf_posproc_diario <- function(arq_conf, log = FALSE, print = FALSE) {
 
     # OUTDIR -------------------------------------------------------------
 
-    CONF$OUTDIR <- file.path("out", "posproc", CONF$OUTDIR)
+    CONF$OUTDIR <- file.path("out", "posproc_diario", CONF$OUTDIR)
     if (!dir.exists(CONF$OUTDIR)) dir.create(CONF$OUTDIR, recursive = TRUE)
+
+    if (early) return(CONF)
 
     # PROCESSA PARAMETROS ------------------------------------------------
 
