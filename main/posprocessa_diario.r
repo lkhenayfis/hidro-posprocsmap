@@ -6,6 +6,7 @@ suppressWarnings(suppressPackageStartupMessages(library(logr)))
 source("R/utils.r")
 source("R/configuracao.r")
 source("R/leitura.r")
+source("R/transformacoes.r")
 source("R/modelos.r")
 
 main <- function(arq_conf) {
@@ -66,6 +67,13 @@ main <- function(arq_conf) {
             by.x = "data", by.y = "data_previsao")
         erros[, erro := vazao.x - vazao.y]
 
+        transf_call <- CONF$TRANSFORMACAO$call
+        transf_call$erro <- erros$erro
+        aux <- eval(transf_call)
+
+        inv_transf_fun <- aux[[2]]
+        erros[, erro := aux[[1]]]
+
         elem_0 <- elem_i
         mod_0  <- mod_i
 
@@ -106,6 +114,7 @@ main <- function(arq_conf) {
             })
             jm <- rbindlist(jm)
             jm[, c("dia_previsao", "id_usina", "id_modelo_previsao") := .(hor_i, usina, mod_prev)]
+            jm[, erro := inv_transf_fun(erro)]
             jm <- jm[complete.cases(jm)]
             setcolorder(jm, c("data_previsao", "dia_previsao", "erro", "id_usina",
                     "id_modelo_previsao"))
