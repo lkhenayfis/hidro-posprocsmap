@@ -1,5 +1,7 @@
 log
 data
 out
+conf/
+!conf/default
 *jpeg
 informals
