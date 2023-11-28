@@ -36,9 +36,12 @@
     // como por exemplo o lambda da transformada de BoxCox
     // Em qualquer caso a serie modelada sera escalonada p media 0 e sd 1
     "TRANSFORMACAO": {
-        "tipo": "identidade",
-        "parametros": {},
-        "janela": null
+        // "tipo": "identidade",
+        // "parametros": {},
+        // "janela": null
+        "tipo": "boxcox_simples",
+        "parametros": {"lambda": "auto"},
+        "janela": "2015/2018"
     },
 
     // Modelos de correcao para rodar nos dados. Devem ser listas contendo um elemento "tipo"

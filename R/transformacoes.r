@@ -23,3 +23,14 @@ transforma_identidade <- function(erro, subset = rep(TRUE, length(erro)), ...) {
     out <- list(erro, inversa)
     return(out)
 }
+
+transforma_boxcox_simples <- function(erro, lambda = "auto", subset = rep(TRUE, length(erro)), ...) {
+    erro_insample <- erro[subset]
+    lambda <- forecast::BoxCox(erro_insample, lambda)
+    lambda <- attr(lambda, "lambda")
+
+    erro_transf <- forecast::BoxCox(erro, lambda)
+    inversa <- function(erro_transf, ...) forecast::InvBoxCox(erro_transf, lambda)
+    out <- list(erro_transf, inversa)
+    return(out)
+}
