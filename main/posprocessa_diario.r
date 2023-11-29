@@ -10,6 +10,49 @@ source("R/leitura.r")
 source("R/transformacoes.r")
 source("R/modelos.r")
 
+INNER_EXEC <- function(mod_posproc, hor, mod_prec,
+    erros, vazoes, previstos, assimilados, usina, CONF) {
+
+    log_print(paste0("-    ", mod_posproc))
+
+    hor_s <- paste0("h", hor)
+    jan <- CONF$PARAMETROS$janela_hormod[[mod_prec]][[hor_s]][[mod_posproc]]
+    jan_i <- strsplit(jan, "/")[[1]][1]
+    jan_i <- as.Date(jan_i)
+
+    call <- CONF$MODELOS[[mod_posproc]]
+    call$erros  <- aplica_subset(erros[dia_previsao <= hor], jan, "data")
+    call$vazoes <- aplica_subset(vazoes, jan, "data")
+    call$previstos   <- aplica_subset(previstos, jan, "data_execucao")
+    call$assimilados <- aplica_subset(assimilados, jan, "data")
+    call$n.ahead <- hor + 1
+
+    jm <- eval(call)
+    jm <- lapply(jm, function(prev_i) {
+        prev_i <- tail(prev_i, 1)
+        tempo <- time(prev_i) - 1
+        data  <- jan_i + as.numeric(tempo)
+        dat   <- as.data.table(prev_i)
+        dat[, data_previsao := data]
+        dat[, sd := NULL]
+        colnames(dat)[1] <- "erro"
+        return(dat)
+    })
+    jm <- rbindlist(jm)
+    jm[, c("dia_previsao", "id_usina", "id_modelo_previsao") := .(hor, usina, mod_prec)]
+    jm[, erro := CONF$TRANSFORMACAO$inversa(erro)]
+    jm <- jm[complete.cases(jm)]
+    setcolorder(jm, c("data_previsao", "dia_previsao", "erro", "id_usina",
+            "id_modelo_previsao"))
+
+    outarq <- paste(mod_posproc, usina, mod_prec, hor, sep = "_")
+    outarq <- file.path(CONF$OUTDIR, paste0(outarq, ".csv"))
+    jm[, id_modelo_correcao := mod_posproc]
+    fwrite(jm, outarq)
+
+    return(NULL)
+}
+
 main <- function(arq_conf) {
 
     timestamp <- format(Sys.time(), format = "%Y%m%d_%H%M%S")
@@ -72,67 +115,26 @@ main <- function(arq_conf) {
         transf_call$erro <- erros$erro
         aux <- eval(transf_call)
 
-        inv_transf_fun <- aux[[2]]
         erros[, erro := aux[[1]]]
+        CONF$TRANSFORMACAO$inversa <- aux[[2]]
 
         elem_0 <- elem_i
         mod_0  <- mod_i
 
-        usina     <- getfromtabela(.DB_SCHEMA$subbacias, codigo = elem_i, "id")$id
-        mod_prev  <- getfromtabela(.DB_SCHEMA$modelos, nome = mod_i, campos = "id")$id
-
-        modelos <- mapply(CONF$MODELOS, CONF$PARAMETROS$janela_hormod[[hor_i]], FUN = function(mod, jan) {
-            mod$erros  <- as.call(list(quote(aplica_subset), quote(erros), jan, "data"))
-            mod$vazoes <- as.call(list(quote(aplica_subset), quote(vaz), jan, "data"))
-            mod$previstos   <- as.call(list(quote(aplica_subset), quote(prev), jan, "data_execucao"))
-            mod$assimilados <- as.call(list(quote(aplica_subset), quote(assm), jan, "data"))
-            mod$n.ahead <- hor_i + 1
-            mod
+        inner_index_loop <- lapply(names(CONF$MODELOS), function(mod) {
+            list(mod, hor_i, mod_i)
         })
-
-        evalenv <- environment()
-
-        EXEC <- function(mod) {
-
-            log_print(paste0("-    ", mod))
-
-            jan_hormod <- CONF$PARAMETROS$janela_hormod[[hor_i]][[mod]]
-            jan_hormod_i <- strsplit(jan_hormod, "/")[[1]][1]
-            jan_hormod_i <- as.Date(jan_hormod_i)
-
-            jm <- eval(modelos[[mod]], envir = evalenv)
-            jm <- lapply(jm, function(prev_i) {
-                prev_i <- tail(prev_i, 1)
-                tempo <- time(prev_i) - 1
-                data  <- jan_hormod_i + as.numeric(tempo)
-                dat   <- as.data.table(prev_i)
-                dat[, data_previsao := data]
-                dat[, sd := NULL]
-                colnames(dat)[1] <- "erro"
-
-                return(dat)
-            })
-            jm <- rbindlist(jm)
-            jm[, c("dia_previsao", "id_usina", "id_modelo_previsao") := .(hor_i, usina, mod_prev)]
-            jm[, erro := inv_transf_fun(erro)]
-            jm <- jm[complete.cases(jm)]
-            setcolorder(jm, c("data_previsao", "dia_previsao", "erro", "id_usina",
-                    "id_modelo_previsao"))
-
-            outarq <- paste(mod, as.character(elem_i), as.character(mod_i), hor_i, sep = "_")
-            outarq <- file.path(CONF$OUTDIR, paste0(outarq, ".csv"))
-            jm[, id_modelo_correcao := mod]
-            fwrite(jm, outarq)
-
-            return(NULL)
-        }
 
         if (CONF$PARALLEL$doparallel) {
             clst <- makeCluster(CONF$PARALLEL$nthreads, "FORK")
-            void <- parLapply(clst, names(modelos), EXEC)
+            void <- parLapply(clst, inner_index_loop, function(v) {
+                INNER_EXEC(v[[1]], v[[2]], v[[3]], erros, vaz, prev, assm, elem_i, CONF)
+            })
             stopCluster(clst)
         } else {
-            void <- lapply(names(modelos), EXEC)
+            void <- lapply(inner_index_loop, function(v) {
+                INNER_EXEC(v[[1]], v[[2]], v[[3]], erros, vaz, prev, assm, elem_i, CONF)
+            })
         }
     }
 
