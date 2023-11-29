@@ -101,7 +101,11 @@ main <- function(arq_conf) {
         )
         metricas[, valor := erro.x - erro.y]
         metricas <- metricas[,
-            .(ME = mean(valor) / mean(erro.x), MSE = mean(valor^2) / mean(erro.x^2)),
+            .(
+                ME2 = mean(valor)^2 / mean(erro.x)^2,
+                VAR = var(valor) / var(erro.x),
+                MSE = mean(valor^2) / mean(erro.x^2)
+            ),
             by = id_modelo_correcao]
         metricas[, c("usina", "modelo", "horizonte") := .(elem_i, mod_i, hor_i)]
 
@@ -112,18 +116,21 @@ main <- function(arq_conf) {
     dat_barplot[, horizonte := factor(horizonte)]
     dat_barplot[, id_modelo_correcao :=
             factor(id_modelo_correcao, levels = unique(id_modelo_correcao))]
+    dat_barplot <- melt(dat_barplot, id.vars = c(1, 5, 6, 7), variable.name = "metrica")
+    dat_barplot[, variable := factor(variable, levels = c("MSE", "ME2", "VAR"))]
 
     cores <- viridisLite::viridis(length(unique(dat_barplot$id_modelo_correcao)))
 
-    barplot_mse <- ggplot(dat_barplot, aes(horizonte, MSE, fill = id_modelo_correcao)) +
+    barplot <- ggplot(dat_barplot, aes(horizonte, value, fill = id_modelo_correcao)) +
         geom_col(color = NA, position = "dodge") +
         geom_hline(yintercept = 1, linetype = 2, color = 1) +
         scale_fill_manual(values = cores) +
         scale_y_continuous(breaks = seq(0, 5, .2), minor_breaks = seq(.1, 5, .2)) +
         coord_cartesian(ylim = c(0, 2)) +
-        facet_wrap(~ usina) +
-        theme_bw()
-    ggsave(file.path(CONF$OUTDIR, "barplot.jpeg"), barplot_mse, width = 16, height = 9)
+        facet_grid(metrica ~ usina) +
+        theme_bw() + theme(legend.position = "bottom")
+
+    ggsave(file.path(CONF$OUTDIR, "barplot.jpeg"), barplot, width = 16, height = 9)
 }
 
 main()
