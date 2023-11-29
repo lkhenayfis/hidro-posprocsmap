@@ -1,6 +1,7 @@
 suppressWarnings(suppressPackageStartupMessages(library(modprev)))
 suppressWarnings(suppressPackageStartupMessages(library(dbrenovaveis)))
 suppressWarnings(suppressPackageStartupMessages(library(data.table)))
+suppressWarnings(suppressPackageStartupMessages(library(parallel)))
 suppressWarnings(suppressPackageStartupMessages(library(logr)))
 
 source("R/utils.r")
@@ -91,8 +92,7 @@ main <- function(arq_conf) {
 
         evalenv <- environment()
 
-        # feito com lapply e nao for para facilitar extensao paralelizada no futuro
-        void <- lapply(names(modelos), function(mod) {
+        EXEC <- function(mod) {
 
             log_print(paste0("-    ", mod))
 
@@ -125,7 +125,15 @@ main <- function(arq_conf) {
             fwrite(jm, outarq)
 
             return(NULL)
-        })
+        }
+
+        if (CONF$PARALLEL$doparallel) {
+            clst <- makeCluster(CONF$PARALLEL$nthreads, "FORK")
+            void <- parLapply(clst, names(modelos), EXEC)
+            stopCluster(clst)
+        } else {
+            void <- lapply(names(modelos), EXEC)
+        }
     }
 
     on.exit(log_close())
