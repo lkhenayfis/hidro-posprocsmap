@@ -13,7 +13,7 @@ source("R/modelos.r")
 INNER_EXEC <- function(mod_posproc, hor, mod_prec,
     erros, vazoes, previstos, assimilados, usina, CONF) {
 
-    log_print(paste0("-    ", mod_posproc))
+    log_print(paste0("-    ", mod_posproc, " - h", hor))
 
     hor_s <- paste0("h", hor)
     jan <- CONF$PARAMETROS$janela_hormod[[mod_prec]][[hor_s]][[mod_posproc]]
@@ -40,7 +40,7 @@ INNER_EXEC <- function(mod_posproc, hor, mod_prec,
     })
     jm <- rbindlist(jm)
     jm[, c("dia_previsao", "id_usina", "id_modelo_previsao") := .(hor, usina, mod_prec)]
-    jm[, erro := CONF$TRANSFORMACAO$inversa(erro)]
+    jm[, erro := CONF$TRANSFORMACAO$inversa[[hor_s]](erro)]
     jm <- jm[complete.cases(jm)]
     setcolorder(jm, c("data_previsao", "dia_previsao", "erro", "id_usina",
             "id_modelo_previsao"))
@@ -82,8 +82,8 @@ main <- function(arq_conf) {
         unlist(l, recursive = FALSE)
     })
 
-    log_print(index_loop)
-    cat("\n")
+    #log_print(index_loop)
+    #cat("\n")
 
     elem_0 <- mod_0 <- hor_0 <- ""
 
@@ -111,11 +111,17 @@ main <- function(arq_conf) {
         erros[, erro := vazao.x - vazao.y]
 
         transf_call <- CONF$TRANSFORMACAO$call
-        transf_call$erro <- erros$erro
-        aux <- eval(transf_call)
+        erros <- split(erros, erros$dia_previsao)
+        erros <- lapply(erros, function(d) {
+            transf_call$erro <- d$erro
+            aux <- eval(transf_call)
+            d$erro <- aux[[1]]
+            list(d, aux[[2]])
+        })
 
-        erros[, erro := aux[[1]]]
-        CONF$TRANSFORMACAO$inversa <- aux[[2]]
+        CONF$TRANSFORMACAO$inversa <- lapply(erros, "[[", 2)
+        names(CONF$TRANSFORMACAO$inversa) <- paste0("h", names(CONF$TRANSFORMACAO$inversa))
+        erros <- rbindlist(lapply(erros, "[[", 1))
 
         elem_0 <- elem_i
         mod_0  <- mod_i
