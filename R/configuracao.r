@@ -56,13 +56,15 @@ le_conf_posproc_diario <- function(arq_conf, log = FALSE, print = FALSE, early =
 
     janela_i <- as.Date(janela[[1]][1])
 
-    CONF$PARAMETROS$janela_hormod <- lapply(all_hors, function(h) {
-        lapply(CONF$MODELOS, function(m) {
-            jj <- tail(m$janela, 1)
-            janela_i <- janela_i - (jj + h)
-            janela_f <- as.POSIXct(janela[[2]][2], tz = "GMT") - 1
+    CONF$PARAMETROS$janela_hormod <- lapply(seq_along(CONF$PARAMETROS$modelos), function(mp) {
+        lapply(CONF$PARAMETROS$horizontes[[mp]], function(h) {
+            lapply(CONF$MODELOS, function(m) {
+                jj <- tail(m$janela, 1)
+                janela_i <- janela_i - (jj + h)
+                janela_f <- as.POSIXct(janela[[2]][2], tz = "GMT") - 1
 
-            paste0(janela_i, "/", janela_f)
+                paste0(janela_i, "/", janela_f)
+            })
         })
     })
 
