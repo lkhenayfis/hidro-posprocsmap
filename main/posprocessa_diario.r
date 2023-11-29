@@ -74,28 +74,27 @@ main <- function(arq_conf) {
     # EXECUCAO PRINCIPAL -------------------------------------------------
 
     index_loop <- with(CONF$PARAMETROS, {
-        ll <- lapply(seq(modelos), function(i) {
-            expand.grid(elem = elementos, mod = modelos[i], hor = horizontes[[i]],
-                stringsAsFactors = FALSE)
+        l <- lapply(modelos, function(mod_prec) {
+            lapply(elementos, function(elem) {
+                list(elem, mod_prec, horizontes[[mod_prec]])
+            })
         })
-        do.call(rbind, ll)
+        unlist(l, recursive = FALSE)
     })
-    setDT(index_loop)
-    setorder(index_loop, elem, mod, hor)
 
     log_print(index_loop)
     cat("\n")
 
     elem_0 <- mod_0 <- hor_0 <- ""
 
-    for (i in seq_len(nrow(index_loop))) {
+    for (item in index_loop) {
 
-        elem_i <- index_loop$elem[i]
-        mod_i  <- index_loop$mod[i]
-        hor_i  <- index_loop$hor[i]
-        max_hor_i <- index_loop[(elem == elem_i) & (mod == mod_i), max(hor)]
+        elem_i <- item[[1]]
+        mod_i  <- item[[2]]
+        hor_i  <- item[[3]]
+        max_hor_i <- max(hor_i)
 
-        log_print(paste(elem_i, mod_i, hor_i, sep = " -- "))
+        log_print(paste(elem_i, mod_i, paste0(hor_i, collapse = ","), sep = " -- "))
 
         if (elem_i != elem_0) {
             vaz  <- le_vazoes(elem_i, CONF$PARAMETROS$janela_dados)
@@ -107,7 +106,7 @@ main <- function(arq_conf) {
 
         erros <- merge(
             vaz[, .(data, vazao)],
-            prev[dia_previsao %in% seq_len(hor_i), .(data_previsao, dia_previsao, data_execucao, vazao)],
+            prev[dia_previsao %in% hor_i, .(data_previsao, dia_previsao, data_execucao, vazao)],
             by.x = "data", by.y = "data_previsao")
         erros[, erro := vazao.x - vazao.y]
 
@@ -121,19 +120,18 @@ main <- function(arq_conf) {
         elem_0 <- elem_i
         mod_0  <- mod_i
 
-        inner_index_loop <- lapply(names(CONF$MODELOS), function(mod) {
-            list(mod, hor_i, mod_i)
-        })
+        inner_index_loop <- expand.grid(names(CONF$MODELOS), hor_i, stringsAsFactors = FALSE)
+        inner_index_loop <- split(inner_index_loop, seq_len(nrow(inner_index_loop)))
 
         if (CONF$PARALLEL$doparallel) {
             clst <- makeCluster(CONF$PARALLEL$nthreads, "FORK")
             void <- parLapply(clst, inner_index_loop, function(v) {
-                INNER_EXEC(v[[1]], v[[2]], v[[3]], erros, vaz, prev, assm, elem_i, CONF)
+                INNER_EXEC(v[[1]], v[[2]], mod_i, erros, vaz, prev, assm, elem_i, CONF)
             })
             stopCluster(clst)
         } else {
             void <- lapply(inner_index_loop, function(v) {
-                INNER_EXEC(v[[1]], v[[2]], v[[3]], erros, vaz, prev, assm, elem_i, CONF)
+                INNER_EXEC(v[[1]], v[[2]], mod_i, erros, vaz, prev, assm, elem_i, CONF)
             })
         }
     }
