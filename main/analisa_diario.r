@@ -90,7 +90,7 @@ main <- function(arq_conf) {
             scale_color_manual(values = cores) +
             facet_wrap(~ year(data), ncol = 1, scales = "free") +
             theme_bw()
-        arq_lineplot <- index_loop[i, paste0(c("lineplot", elem, mod, hor), collapse = "_")]
+        arq_lineplot <- index_loop[i, paste0(c(elem, mod, hor, "lineplot"), collapse = "_")]
         ggsave(file.path(CONF$OUTDIR, paste0(arq_lineplot, ".jpeg")), lineplot,
             width = 16, height = 9)
 
@@ -117,20 +117,22 @@ main <- function(arq_conf) {
     dat_barplot[, id_modelo_correcao :=
             factor(id_modelo_correcao, levels = unique(id_modelo_correcao))]
     dat_barplot <- melt(dat_barplot, id.vars = c(1, 5, 6, 7), variable.name = "metrica")
-    dat_barplot[, variable := factor(variable, levels = c("MSE", "ME2", "VAR"))]
+    dat_barplot[, metrica := factor(metrica, levels = c("MSE", "ME2", "VAR"))]
+    dat_barplot <- split(dat_barplot, dat_barplot$usina)
 
-    cores <- viridisLite::viridis(length(unique(dat_barplot$id_modelo_correcao)))
-
-    barplot <- ggplot(dat_barplot, aes(horizonte, value, fill = id_modelo_correcao)) +
-        geom_col(color = NA, position = "dodge") +
-        geom_hline(yintercept = 1, linetype = 2, color = 1) +
-        scale_fill_manual(values = cores) +
-        scale_y_continuous(breaks = seq(0, 5, .2), minor_breaks = seq(.1, 5, .2)) +
-        coord_cartesian(ylim = c(0, 2)) +
-        facet_grid(metrica ~ usina) +
-        theme_bw() + theme(legend.position = "bottom")
-
-    ggsave(file.path(CONF$OUTDIR, "barplot.jpeg"), barplot, width = 16, height = 9)
+    for (dat in dat_barplot) {
+        cores <- viridisLite::viridis(length(unique(dat$id_modelo_correcao)))
+        barplot <- ggplot(dat, aes(horizonte, value, fill = id_modelo_correcao)) +
+            geom_col(color = "white", position = "dodge") +
+            geom_hline(yintercept = 1, linetype = 2, color = 1) +
+            scale_fill_manual(values = cores) +
+            scale_y_continuous(breaks = seq(0, 5, .2), minor_breaks = seq(.1, 5, .2)) +
+            coord_cartesian(ylim = c(0, 2)) +
+            facet_grid(metrica ~ usina + modelo) +
+            theme_bw() + theme(legend.position = "bottom")
+        arq_barplot <- paste0(c(dat$usina[1], dat$modelo[1], "barplot"), collapse = "_")
+        ggsave(file.path(CONF$OUTDIR, paste0(arq_barplot, ".jpeg")), barplot, width = 16, height = 9)
+    }
 }
 
 main()
