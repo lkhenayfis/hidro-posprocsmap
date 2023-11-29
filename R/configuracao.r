@@ -44,6 +44,7 @@ le_conf_posproc_diario <- function(arq_conf, log = FALSE, print = FALSE, early =
         vec <- CONF$PARAMETROS$horizontes
         CONF$PARAMETROS$horizontes <- lapply(seq_along(CONF$PARAMETROS$modelos), function(i) vec)
     }
+    names(CONF$PARAMETROS$horizontes) <- CONF$PARAMETROS$modelos
 
     all_hors <- unique(unlist(CONF$PARAMETROS$horizontes))
     max_hor <- max(all_hors)
@@ -57,7 +58,7 @@ le_conf_posproc_diario <- function(arq_conf, log = FALSE, print = FALSE, early =
     janela_i <- as.Date(janela[[1]][1])
 
     CONF$PARAMETROS$janela_hormod <- lapply(seq_along(CONF$PARAMETROS$modelos), function(mp) {
-        lapply(CONF$PARAMETROS$horizontes[[mp]], function(h) {
+        l <- lapply(CONF$PARAMETROS$horizontes[[mp]], function(h) {
             lapply(CONF$MODELOS, function(m) {
                 jj <- tail(m$janela, 1)
                 janela_i <- janela_i - (jj + h)
@@ -66,7 +67,10 @@ le_conf_posproc_diario <- function(arq_conf, log = FALSE, print = FALSE, early =
                 paste0(janela_i, "/", janela_f)
             })
         })
+        names(l) <- paste0("h", CONF$PARAMETROS$horizontes[[mp]])
+        l
     })
+    names(CONF$PARAMETROS$janela_hormod) <- CONF$PARAMETROS$modelos
 
     # TRANSFORMACAO DE DADOS ---------------------------------------------
 
