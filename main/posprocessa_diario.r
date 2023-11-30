@@ -71,6 +71,8 @@ main <- function(arq_conf) {
 
     CONF <- le_conf_posproc_diario(arq_conf, !interactive(), !interactive())
 
+    file.copy(arq_conf, file.path(CONF$OUTDIR, "conf_echo.jsonc"))
+
     # EXECUCAO PRINCIPAL -------------------------------------------------
 
     index_loop <- with(CONF$PARAMETROS, {
