@@ -2,6 +2,7 @@ suppressWarnings(suppressPackageStartupMessages(library(modprev)))
 suppressWarnings(suppressPackageStartupMessages(library(dbrenovaveis)))
 suppressWarnings(suppressPackageStartupMessages(library(data.table)))
 suppressWarnings(suppressPackageStartupMessages(library(parallel)))
+suppressWarnings(suppressPackageStartupMessages(library(future.apply)))
 suppressWarnings(suppressPackageStartupMessages(library(logr)))
 
 source("R/utils.r")
@@ -132,11 +133,10 @@ main <- function(arq_conf) {
         inner_index_loop <- split(inner_index_loop, seq_len(nrow(inner_index_loop)))
 
         if (CONF$PARALLEL$doparallel) {
-            clst <- makeCluster(CONF$PARALLEL$nthreads, "FORK")
-            void <- parLapply(clst, inner_index_loop, function(v) {
+            plan(multicore, workers = CONF$PARALLEL$nthreads)
+            void <- future_sapply(inner_index_loop, function(v) {
                 INNER_EXEC(v[[1]], v[[2]], mod_i, erros, vaz, prev, assm, elem_i, CONF)
             })
-            stopCluster(clst)
         } else {
             void <- lapply(inner_index_loop, function(v) {
                 INNER_EXEC(v[[1]], v[[2]], mod_i, erros, vaz, prev, assm, elem_i, CONF)
