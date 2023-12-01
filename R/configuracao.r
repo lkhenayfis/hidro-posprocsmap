@@ -24,11 +24,11 @@ le_conf_posproc_diario <- function(arq_conf, log = FALSE, print = FALSE, early =
     # PROCESSA PARAMETROS ------------------------------------------------
 
     if (length(CONF$PARAMETROS$elementos) == 0) {
-        CONF$PARAMETROS$elementos <- getfromtabela(.DB_SCHEMA$subbacias, "codigo")[[1]]
+        CONF$PARAMETROS$elementos <- getfromtabela(.DB_SCHEMA$subbacias)[["codigo"]]
     }
 
     if (length(CONF$PARAMETROS$modelos) == 0) {
-        CONF$PARAMETROS$modelos <- getfromtabela(.DB_SCHEMA$modelos, "nome")[[1]]
+        CONF$PARAMETROS$modelos <- getfromtabela(.DB_SCHEMA$modelos)[["nome"]]
     }
 
     # os horizontes sao uma lista com um elemento para cada modelo
