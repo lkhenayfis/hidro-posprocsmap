@@ -118,6 +118,21 @@ main <- function(arq_conf) {
             factor(id_modelo_correcao, levels = unique(id_modelo_correcao))]
     dat_barplot <- melt(dat_barplot, id.vars = c(1, 5, 6, 7), variable.name = "metrica")
     dat_barplot[, metrica := factor(metrica, levels = c("MSE", "ME2", "VAR"))]
+
+    # Barplot todas as usinas somente MSE --------------------------------
+
+    barplot <- ggplot(dat_barplot[metrica == "MSE"], aes(horizonte, value, fill = id_modelo_correcao)) +
+        geom_col(color = "white", position = "dodge") +
+        geom_hline(yintercept = 1, linetype = 2, color = 1) +
+        scale_fill_manual(values = cores[-1]) +
+        scale_y_continuous(breaks = seq(0, 5, .2), minor_breaks = seq(.1, 5, .2)) +
+        coord_cartesian(ylim = c(0, 1.3)) +
+        facet_wrap(~ usina + modelo) +
+        theme_bw() + theme(legend.position = "bottom")
+    ggsave(file.path(CONF$OUTDIR, "barplot.jpeg"), barplot, width = 16, height = 9)
+
+    # Barplot por usina com MSE decomposto -------------------------------
+
     dat_barplot <- split(dat_barplot, dat_barplot$usina)
 
     for (dat in dat_barplot) {
