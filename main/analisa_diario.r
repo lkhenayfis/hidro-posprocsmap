@@ -82,7 +82,7 @@ main <- function(arq_conf) {
         dplot[, id_modelo_correcao :=
                 factor(id_modelo_correcao, levels = unique(id_modelo_correcao))]
 
-        cores <- viridisLite::viridis(length(unique(posprocs$id_modelo_correcao)))
+        cores <- RColorBrewer::brewer.pal(length(unique(posprocs$id_modelo_correcao)), "Set1")
         cores <- c("black", cores)
 
         lineplot <- ggplot(dplot, aes(data, erro, color = id_modelo_correcao)) +
@@ -121,13 +121,13 @@ main <- function(arq_conf) {
     dat_barplot <- split(dat_barplot, dat_barplot$usina)
 
     for (dat in dat_barplot) {
-        cores <- viridisLite::viridis(length(unique(dat$id_modelo_correcao)))
+        cores <- RColorBrewer::brewer.pal(length(unique(dat$id_modelo_correcao)), "Set1")
         barplot <- ggplot(dat, aes(horizonte, value, fill = id_modelo_correcao)) +
             geom_col(color = "white", position = "dodge") +
             geom_hline(yintercept = 1, linetype = 2, color = 1) +
             scale_fill_manual(values = cores) +
             scale_y_continuous(breaks = seq(0, 5, .2), minor_breaks = seq(.1, 5, .2)) +
-            coord_cartesian(ylim = c(0, 2)) +
+            coord_cartesian(ylim = c(0, 1.3)) +
             facet_grid(metrica ~ usina + modelo) +
             theme_bw() + theme(legend.position = "bottom")
         arq_barplot <- paste0(c(dat$usina[1], dat$modelo[1], "barplot"), collapse = "_")
