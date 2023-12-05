@@ -123,3 +123,34 @@ process_regs_gam <- function(previstos, assimilados, erros, lags, hors, ...) {
 
     return(varex)
 }
+
+GAM_AUTOREG <- function(erros, vazoes, previstos, assimilados,
+    janela, passo, n.ahead, refit.cada,
+    formula, lags_erro = seq(10), ...) {
+
+    varex   <- process_regs_gam(previstos, assimilados, erros, lags_erro, max(erros$dia_previsao))
+    regdata <- merge(
+        erros[dia_previsao == max(dia_previsao), .(data, erro)],
+        varex,
+        by.x = "data", by.y = "max_data_previsao"
+    )
+    regdata[, data_execucao := NULL]
+
+    # Para facilitar a especificacao de formula pelo json, renomeia as colunas de lag de erro
+    colnames(regdata) <- sub("h_([[:digit:]]+)_l_([[:digit:]]+)", "l_\\2", colnames(regdata))
+
+    regdata <- regdata[, lapply(.SD, function(x) scale(x)[, 1]), .SDcols = -1]
+    colsna  <- sapply(regdata, function(x) all(is.na(x)))
+    regdata <- regdata[, .SD, .SDcols = !colsna]
+
+    serie <- regdata$erro
+    serie <- ts(serie)
+    regdata <- regdata[, -1]
+
+    formula <- as.formula(formula)
+
+    jm <- janelamovel(serie, "GAM", janela, passo, n.ahead, refit.cada,
+        regdata = regdata, formula = formula, ...)
+
+    return(jm)
+}
