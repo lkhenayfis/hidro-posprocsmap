@@ -21,11 +21,17 @@ INNER_EXEC <- function(mod_posproc, hor, mod_prec,
     jan_i <- strsplit(jan, "/")[[1]][1]
     jan_i <- as.Date(jan_i)
 
+    jan_prev <- jan_assm <- as.Date(strsplit(jan, "/")[[1]])
+    jan_prev <- jan_prev - hor + 1
+    jan_assm <- jan_assm - hor
+    jan_prev <- paste0(jan_prev, collapse = "/")
+    jan_assm <- paste0(jan_assm, collapse = "/")
+
     call <- CONF$MODELOS[[mod_posproc]]
     call$erros  <- aplica_subset(erros[dia_previsao <= hor], jan, "data")
     call$vazoes <- aplica_subset(vazoes, jan, "data")
-    call$previstos   <- aplica_subset(previstos, jan, "data_execucao")
-    call$assimilados <- aplica_subset(assimilados, jan, "data")
+    call$previstos   <- aplica_subset(previstos[dia_previsao <= hor], jan_prev, "data")
+    call$assimilados <- aplica_subset(assimilados, jan_prev, "data")
     call$n.ahead <- hor + 1
 
     jm <- eval(call)
