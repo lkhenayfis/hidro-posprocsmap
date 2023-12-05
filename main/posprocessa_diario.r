@@ -101,7 +101,7 @@ main <- function(arq_conf) {
 
         if (elem_i != elem_0) {
             vaz  <- le_vazoes(elem_i, CONF$PARAMETROS$janela_dados)
-            prev <- le_previstos(elem_i, CONF$PARAMETROS$janela_dados, mod_i, seq_len(max_hor_i))
+            prev <- le_previstos(elem_i, CONF$PARAMETROS$janela_dados_prev, mod_i, seq_len(max_hor_i))
             assm <- le_assimilacao(elem_i, CONF$PARAMETROS$janela_dados)
         } else if (mod_i != mod_0) {
             prev <- le_previstos(elem_i, CONF$PARAMETROS$janela_dados, mod_i, seq_len(max_hor_i))

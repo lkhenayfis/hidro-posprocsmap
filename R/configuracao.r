@@ -91,6 +91,7 @@ le_conf_posproc_diario <- function(arq_conf, log = FALSE, print = FALSE, early =
     CONF$TRANSFORMACAO <- list(call = transf_call, janela = janela_transf)
 
     CONF$PARAMETROS$janela_dados <- paste0(janela_max_i, "/", janela_max_f)
+    CONF$PARAMETROS$janela_dados_prev <- paste0(janela_max_i - max_hor + 1, "/", janela_max_f)
 
     # MONTA CALLS DOS MODELOS ---------------------------------------
 
