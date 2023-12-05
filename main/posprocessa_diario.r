@@ -17,21 +17,19 @@ INNER_EXEC <- function(mod_posproc, hor, mod_prec,
     log_print(paste0("-    ", mod_posproc, " - h", hor))
 
     hor_s <- paste0("h", hor)
-    jan <- CONF$PARAMETROS$janela_hormod[[mod_prec]][[hor_s]][[mod_posproc]]
-    jan_i <- strsplit(jan, "/")[[1]][1]
+    jan   <- CONF$PARAMETROS$janela_hormod[[mod_prec]][[hor_s]][[mod_posproc]]
+    jan_dados <- jan[1]
+    jan_prev  <- jan[2]
+    jan_assm  <- jan[3]
+
+    jan_i <- strsplit(jan_dados, "/")[[1]][1]
     jan_i <- as.Date(jan_i)
 
-    jan_prev <- jan_assm <- as.Date(strsplit(jan, "/")[[1]])
-    jan_prev <- jan_prev - hor + 1
-    jan_assm <- jan_assm - hor
-    jan_prev <- paste0(jan_prev, collapse = "/")
-    jan_assm <- paste0(jan_assm, collapse = "/")
-
     call <- CONF$MODELOS[[mod_posproc]]
-    call$erros  <- aplica_subset(erros[dia_previsao <= hor], jan, "data")
-    call$vazoes <- aplica_subset(vazoes, jan, "data")
-    call$previstos   <- aplica_subset(previstos[dia_previsao <= hor], jan_prev, "data")
-    call$assimilados <- aplica_subset(assimilados, jan_prev, "data")
+    call$erros  <- aplica_subset(erros[dia_previsao <= hor], jan_dados, "data")
+    call$vazoes <- aplica_subset(vazoes, jan_dados, "data")
+    call$previstos   <- aplica_subset(previstos[dia_previsao <= hor], jan_prev, "data_previsao")
+    call$assimilados <- aplica_subset(assimilados, jan_assm, "data")
     call$n.ahead <- hor + 1
 
     jm <- eval(call)
@@ -105,12 +103,13 @@ main <- function(arq_conf) {
 
         log_print(paste(elem_i, mod_i, paste0(hor_i, collapse = ","), sep = " -- "))
 
+        jd <- CONF$PARAMETROS$janela_dados
         if (elem_i != elem_0) {
-            vaz  <- le_vazoes(elem_i, CONF$PARAMETROS$janela_dados)
-            prev <- le_previstos(elem_i, CONF$PARAMETROS$janela_dados_prev, mod_i, seq_len(max_hor_i))
-            assm <- le_assimilacao(elem_i, CONF$PARAMETROS$janela_dados)
+            vaz  <- le_vazoes(elem_i, jd[1])
+            prev <- le_previstos(elem_i, jd[2], mod_i, seq_len(max_hor_i))
+            assm <- le_assimilacao(elem_i, jd[3])
         } else if (mod_i != mod_0) {
-            prev <- le_previstos(elem_i, CONF$PARAMETROS$janela_dados, mod_i, seq_len(max_hor_i))
+            prev <- le_previstos(elem_i, jd[2], mod_i, seq_len(max_hor_i))
         }
 
         erros <- merge(

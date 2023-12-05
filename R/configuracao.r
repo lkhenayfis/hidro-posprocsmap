@@ -64,7 +64,10 @@ le_conf_posproc_diario <- function(arq_conf, log = FALSE, print = FALSE, early =
                 janela_i <- janela_i - (jj + h)
                 janela_f <- as.POSIXct(janela[[2]][2], tz = "GMT") - 1
 
-                paste0(janela_i, "/", janela_f)
+                janela_i_assm <- janela_i - h
+                janela_i_prev <- janela_i - h + 1
+
+                paste0(c(janela_i, janela_i_prev, janela_i_assm), "/", janela_f)
             })
         })
         names(l) <- paste0("h", CONF$PARAMETROS$horizontes[[mp]])
@@ -90,8 +93,10 @@ le_conf_posproc_diario <- function(arq_conf, log = FALSE, print = FALSE, early =
 
     CONF$TRANSFORMACAO <- list(call = transf_call, janela = janela_transf)
 
-    CONF$PARAMETROS$janela_dados <- paste0(janela_max_i, "/", janela_max_f)
-    CONF$PARAMETROS$janela_dados_prev <- paste0(janela_max_i - max_hor + 1, "/", janela_max_f)
+    janela_max_i_assm <- janela_max_i - max_hor
+    janela_max_i_prev <- janela_max_i - max_hor + 1
+    v_jans <- c(janela_max_i, janela_max_i_prev, janela_max_i_assm)
+    CONF$PARAMETROS$janela_dados <- paste0(v_jans, "/", janela_max_f)
 
     # MONTA CALLS DOS MODELOS ---------------------------------------
 
