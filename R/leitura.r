@@ -98,7 +98,7 @@ le_assimilacao <- function(subbacia, janela = "*", short = TRUE) {
 
 le_previstos <- function(subbacia, janela = "*", modelo = "PMEDIA", horizonte = seq_len(10),
     short = TRUE) {
-    campos <- if (short) c("data_previsao", "dia_previsao", "precipitacao") else "*"
+    campos <- if (short) c("data_previsao", "dia_previsao", "precipitacao", "vazao") else "*"
     previstos <- getfromtabela(.DB_SCHEMA$previstos, data_previsao = janela, subbacia = subbacia,
         modelo = modelo, dia_previsao = horizonte, campos = campos)
     previstos[, data_execucao := data_previsao - dia_previsao]
