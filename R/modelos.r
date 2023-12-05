@@ -90,3 +90,23 @@ process_previstos <- function(previstos) {
 
     return(previstos)
 }
+
+process_lags_erro <- function(erros, lags) {
+
+    hors <- sort(unique(erros$dia_previsao))
+
+    erros <- dcast(erros, data_execucao ~ dia_previsao, value.var = "erro")
+    colnames(erros)[-1] <- paste0("d_", colnames(erros)[-1])
+
+    out <- lapply(seq_along(hors), function(i) {
+        h <- hors[i]
+        dlag <- lapply(lags, function(l) data.table::shift(erros[[1 + i]], h + l))
+        dlag <- as.data.table(dlag)
+        colnames(dlag) <- paste0("h_", h, "_l_", lags)
+        dlag
+    })
+    out <- do.call(cbind, out)
+    out[, data_execucao := erros$data_execucao]
+
+    return(out)
+}
