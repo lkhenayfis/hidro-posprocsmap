@@ -72,6 +72,7 @@ ARMA_RAW <- function(erros, vazoes, previstos, assimilados,
 
 process_previstos <- function(previstos) {
     max_hor <- max(previstos$dia_previsao)
+    previstos <- copy(previstos)
 
     # acumula apenas as previsoes com trajeto completo
     acumulados <- previstos[, .("acumulado" = ifelse(.N == max_hor, sum(precipitacao), NA_real_)),
@@ -91,9 +92,7 @@ process_previstos <- function(previstos) {
     return(previstos)
 }
 
-process_lags_erro <- function(erros, lags) {
-
-    hors <- sort(unique(erros$dia_previsao))
+process_lags_erro <- function(erros, lags, hors) {
 
     erros <- dcast(erros, data_execucao ~ dia_previsao, value.var = "erro")
     colnames(erros)[-1] <- paste0("d_", colnames(erros)[-1])
@@ -109,4 +108,18 @@ process_lags_erro <- function(erros, lags) {
     out[, data_execucao := erros$data_execucao]
 
     return(out)
+}
+
+process_regs_gam <- function(previstos, assimilados, erros, lags, hors, ...) {
+
+    previstos <- process_previstos(previstos)
+    lags_erro <- process_lags_erro(erros, lags, hors)
+    assimilados <- assimilados[dia_assimilacao == 1, .SD, .SDcols = -c("dia_assimilacao")]
+
+    varex <- merge(previstos, lags_erro, by = "data_execucao")
+    varex <- merge(varex, assimilados, by.x = "data_execucao", by.y = "data")
+
+    setcolorder(varex, c("max_data_previsao", "data_execucao"))
+
+    return(varex)
 }
