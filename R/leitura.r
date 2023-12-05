@@ -83,19 +83,24 @@ le_psat <- function(subbacia, janela = "*", retorna_extra = c("postos", "comb_es
     return(psat)
 }
 
-le_vazoes <- function(subbacia, janela = "*") {
-    vazoes <- getfromtabela(.DB_SCHEMA$vazoes, data = janela, subbacia = subbacia)
+le_vazoes <- function(subbacia, janela = "*", short = TRUE) {
+    campos <- if (short) c("data", "vazao") else "*"
+    vazoes <- getfromtabela(.DB_SCHEMA$vazoes, data = janela, subbacia = subbacia, campos = campos)
     return(vazoes)
 }
 
-le_assimilacao <- function(subbacia, janela = "*") {
-    assimilacao <- getfromtabela(.DB_SCHEMA$assimilacao, data = janela, subbacia = subbacia)
+le_assimilacao <- function(subbacia, janela = "*", short = TRUE) {
+    campos <- if (short) c("data", "dia_assimilacao", "rsolo", "rsub", "rsup", "rsup2") else "*"
+    assimilacao <- getfromtabela(.DB_SCHEMA$assimilacao, data = janela, subbacia = subbacia,
+        campos = campos)
     return(assimilacao)
 }
 
-le_previstos <- function(subbacia, janela = "*", modelo = "PMEDIA", horizonte = seq_len(10)) {
+le_previstos <- function(subbacia, janela = "*", modelo = "PMEDIA", horizonte = seq_len(10),
+    short = TRUE) {
+    campos <- if (short) c("data_previsao", "dia_previsao", "precipitacao") else "*"
     previstos <- getfromtabela(.DB_SCHEMA$previstos, data_previsao = janela, subbacia = subbacia,
-        modelo = modelo, dia_previsao = horizonte)
+        modelo = modelo, dia_previsao = horizonte, campos = campos)
     previstos[, data_execucao := data_previsao - dia_previsao]
     return(previstos)
 }
