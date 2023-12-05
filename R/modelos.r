@@ -67,3 +67,26 @@ ARMA_RAW <- function(erros, vazoes, previstos, assimilados,
 
     return(jm)
 }
+
+# MODELOS GAM --------------------------------------------------------------------------------------
+
+process_previstos <- function(previstos) {
+    max_hor <- max(previstos$dia_previsao)
+
+    # acumula apenas as previsoes com trajeto completo
+    acumulados <- previstos[, .("acumulado" = ifelse(.N == max_hor, sum(precipitacao), NA_real_)),
+        by = .(data_execucao)]
+    acumulados <- acumulados[complete.cases(acumulados)]
+
+    previstos[, precipitacao := precipitacao /
+            ifelse(sum(precipitacao) == 0, 1, sum(precipitacao)),
+        by = data_execucao]
+    previstos <- dcast(previstos, data_execucao ~ dia_previsao, value.var = "precipitacao")
+    previstos <- previstos[complete.cases(previstos)]
+    colnames(previstos)[-1] <- paste0("h", colnames(previstos)[-1])
+
+    previstos <- merge(previstos, acumulados)
+    previstos[, max_data_previsao := data_execucao + max_hor]
+
+    return(previstos)
+}
