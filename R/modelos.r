@@ -58,7 +58,7 @@
 
 # MODELOS ARMA -------------------------------------------------------------------------------------
 
-ARMA_RAW <- function(erros, vazoes, previstos, assimilados,
+ARMA <- function(erros, vazoes, previstos, assimilados,
     janela, passo, n.ahead, refit.cada, ...) {
 
     serie <- ts(erros[dia_previsao == max(dia_previsao)]$erro)
@@ -124,7 +124,7 @@ process_regs_gam <- function(previstos, assimilados, erros, lags, hors, ...) {
     return(varex)
 }
 
-GAM_AUTOREG <- function(erros, vazoes, previstos, assimilados,
+GAM <- function(erros, vazoes, previstos, assimilados,
     janela, passo, n.ahead, refit.cada,
     formula, lags_erro = seq(10), ...) {
 
