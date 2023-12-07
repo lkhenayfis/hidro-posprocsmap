@@ -139,7 +139,11 @@ GAM <- function(erros, vazoes, previstos, assimilados,
     # Para facilitar a especificacao de formula pelo json, renomeia as colunas de lag de erro
     colnames(regdata) <- sub("h_([[:digit:]]+)_l_([[:digit:]]+)", "l_\\2", colnames(regdata))
 
-    regdata <- regdata[, lapply(.SD, function(x) scale(x)[, 1]), .SDcols = -1]
+    scales <- lapply(regdata, function(v) {
+        v <- scale(v)
+        list(v[, 1], c(attr(v, "scaled:center"), attr(v, "scaled:scale")))
+    })
+    regdata <- as.data.table(do.call("cbind", lapply(scales, "[[", 1)))[, -1]
     colsna  <- sapply(regdata, function(x) all(is.na(x)))
     regdata <- regdata[, .SD, .SDcols = !colsna]
 
@@ -151,6 +155,11 @@ GAM <- function(erros, vazoes, previstos, assimilados,
 
     jm <- janelamovel(serie, "GAM", janela, passo, n.ahead, refit.cada,
         regdata = regdata, formula = formula, ...)
+    
+    jm <- lapply(jm, function(j) {
+        j[, 1] <- j[, 1] * scales$erro[[2]][2] + scales$erro[[2]][1]
+        j
+    })
 
     return(jm)
 }
