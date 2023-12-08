@@ -173,3 +173,33 @@ GAM <- function(erros, vazoes, previstos, assimilados,
 
     return(jm)
 }
+
+# BOOST DE MODELOS ADITIVOS ------------------------------------------------------------------------
+
+BOOST_REG <- function(erros, vazoes, previstos, assimilados,
+    janela, passo, n.ahead, refit.cada,
+    formula = Y ~ ., mstop = 2000, lags_erro = seq(10), family = "Gaussian", ...) {
+
+    formula <- as.formula(formula)
+
+    family <- eval(parse(text = paste0("mboost::", family, "()")))
+
+    aux <- prepara_dados(previstos, assimilados, erros, lags_erro, unique(erros$dia_previsao))
+    scales  <- aux[[1]]
+    regdata <- aux[[2]]
+    serie   <- aux[[3]]
+
+    # tira o perfil de previsao -- causa algumas instabilidades e tambem nao sera usado no 
+    # operacional
+    regdata <- regdata[, .SD, .SDcols = -paste0("h", unique(erros$dia_previsao))]
+
+    jm <- janelamovel(serie, "BOOST", janela, passo, n.ahead, refit.cada,
+        regdata = regdata, family = family, control = mboost::boost_control(mstop = mstop), ...)
+
+    jm <- lapply(jm, function(j) {
+        j[, 1] <- j[, 1] * scales$erro[[2]][2] + scales$erro[[2]][1]
+        j
+    })
+
+    return(jm)
+}
