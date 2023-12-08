@@ -124,20 +124,14 @@ process_regs_gam <- function(previstos, assimilados, erros, lags, hors, ...) {
     return(varex)
 }
 
-GAM <- function(erros, vazoes, previstos, assimilados,
-    janela, passo, n.ahead, refit.cada,
-    formula, lags_erro = seq(10), ...) {
-
-    varex   <- process_regs_gam(previstos, assimilados, erros, lags_erro, max(erros$dia_previsao))
+prepara_dados <- function(previstos, assimilados, erros, lags, hors, ...) {
+    varex   <- process_regs_gam(previstos, assimilados, erros, lags, hors)
     regdata <- merge(
         erros[dia_previsao == max(dia_previsao), .(data, erro)],
         varex,
         by.x = "data", by.y = "max_data_previsao"
     )
     regdata[, data_execucao := NULL]
-
-    # Para facilitar a especificacao de formula pelo json, renomeia as colunas de lag de erro
-    colnames(regdata) <- sub("h_([[:digit:]]+)_l_([[:digit:]]+)", "l_\\2", colnames(regdata))
 
     scales <- lapply(regdata, function(v) {
         v <- scale(v)
@@ -151,7 +145,23 @@ GAM <- function(erros, vazoes, previstos, assimilados,
     serie <- ts(serie)
     regdata <- regdata[, -1]
 
+    out <- list(scales, regdata, serie)
+    return(out)
+}
+
+GAM <- function(erros, vazoes, previstos, assimilados,
+    janela, passo, n.ahead, refit.cada,
+    formula, lags_erro = seq(10), ...) {
+
     formula <- as.formula(formula)
+
+    aux <- prepara_dados(previstos, assimilados, erros, lags_erro, max(erros$dia_previsao))
+    scales  <- aux[[1]]
+    regdata <- aux[[2]]
+    serie   <- aux[[3]]
+    
+    # Para facilitar a especificacao de formula pelo json, renomeia as colunas de lag de erro
+    colnames(regdata) <- sub("h_([[:digit:]]+)_l_([[:digit:]]+)", "l_\\2", colnames(regdata))
 
     jm <- janelamovel(serie, "GAM", janela, passo, n.ahead, refit.cada,
         regdata = regdata, formula = formula, ...)
