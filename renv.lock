@@ -20,6 +20,17 @@
       ],
       "Hash": "b2866e62bab9378c3cc9476a1954226b"
     },
+    "Formula": {
+      "Package": "Formula",
+      "Version": "1.2-5",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "stats"
+      ],
+      "Hash": "7a29697b75e027767a53fde6c903eca7"
+    },
     "KFAS": {
       "Package": "KFAS",
       "Version": "1.5.0",
@@ -724,6 +735,18 @@
       ],
       "Hash": "7e5e3cbd2a7bc07880c94e22348fb661"
     },
+    "inum": {
+      "Package": "inum",
+      "Version": "1.0-5",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "libcoin",
+        "stats"
+      ],
+      "Hash": "baa4e298aa0fe48568c951d2fcc5d7c2"
+    },
     "isoband": {
       "Package": "isoband",
       "Version": "0.2.7",
@@ -821,6 +844,18 @@
       ],
       "Hash": "d908914ae53b04d4c0c0fd72ecc35370"
     },
+    "libcoin": {
+      "Package": "libcoin",
+      "Version": "1.0-10",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "mvtnorm",
+        "stats"
+      ],
+      "Hash": "3f3775a14588ff5d013e5eab4453bf28"
+    },
     "lifecycle": {
       "Package": "lifecycle",
       "Version": "1.0.3",
@@ -901,6 +936,30 @@
       ],
       "Hash": "7ce2733a9826b3aeb1775d56fd305472"
     },
+    "mboost": {
+      "Package": "mboost",
+      "Version": "2.9-9",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "Matrix",
+        "R",
+        "grDevices",
+        "graphics",
+        "lattice",
+        "methods",
+        "nnls",
+        "parallel",
+        "partykit",
+        "quadprog",
+        "splines",
+        "stabs",
+        "stats",
+        "survival",
+        "utils"
+      ],
+      "Hash": "ded8580befd8b183d183f75253f11d87"
+    },
     "mgcv": {
       "Package": "mgcv",
       "Version": "1.8-42",
@@ -936,8 +995,8 @@
       "RemoteHost": "api.github.com",
       "RemoteRepo": "modprev",
       "RemoteUsername": "lkhenayfis",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "f0b90de7b7e96290584ce5cc9e10e5730f6cf0ff",
+      "RemoteRef": "modboost",
+      "RemoteSha": "0ee7749dea131ac01b8e7d8cf191445aefc88201",
       "Requirements": [
         "KFAS",
         "R",
@@ -947,7 +1006,7 @@
         "quantreg",
         "stats"
       ],
-      "Hash": "6f62afc5fc2e99ac0416607799a557cc"
+      "Hash": "067a2403a37ce1f7509dd2fb3046474c"
     },
     "munsell": {
       "Package": "munsell",
@@ -959,6 +1018,17 @@
         "methods"
       ],
       "Hash": "6dfe8bf774944bd5595785e3229d8771"
+    },
+    "mvtnorm": {
+      "Package": "mvtnorm",
+      "Version": "1.2-4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "stats"
+      ],
+      "Hash": "17e96668f44a28aef0981d9e17c49b59"
     },
     "nlme": {
       "Package": "nlme",
@@ -986,6 +1056,13 @@
       ],
       "Hash": "170da2130d5332bea7d6ede01875ba1d"
     },
+    "nnls": {
+      "Package": "nnls",
+      "Version": "1.5",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "942974f860268d8b22148d142bb8b946"
+    },
     "openssl": {
       "Package": "openssl",
       "Version": "2.0.6",
@@ -1007,6 +1084,27 @@
         "utils"
       ],
       "Hash": "bca377e1c87ec89ebed77bba00635b2e"
+    },
+    "partykit": {
+      "Package": "partykit",
+      "Version": "1.2-20",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "Formula",
+        "R",
+        "grDevices",
+        "graphics",
+        "grid",
+        "inum",
+        "libcoin",
+        "mvtnorm",
+        "rpart",
+        "stats",
+        "survival",
+        "utils"
+      ],
+      "Hash": "8551bfc8d1d6ab813e2e5c8917268cd4"
     },
     "pillar": {
       "Package": "pillar",
@@ -1209,6 +1307,19 @@
       ],
       "Hash": "7b153c746193b143c14baa072bae4e27"
     },
+    "rpart": {
+      "Package": "rpart",
+      "Version": "4.1.19",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "grDevices",
+        "graphics",
+        "stats"
+      ],
+      "Hash": "b3c892a81783376cc2204af0f5805a80"
+    },
     "rprojroot": {
       "Package": "rprojroot",
       "Version": "2.0.3",
@@ -1236,6 +1347,22 @@
         "viridisLite"
       ],
       "Hash": "906cb23d2f1c5680b8ce439b44c6fa63"
+    },
+    "stabs": {
+      "Package": "stabs",
+      "Version": "0.6-4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "grDevices",
+        "graphics",
+        "methods",
+        "parallel",
+        "stats",
+        "utils"
+      ],
+      "Hash": "36f4eafcb1dc16d8035d7fe7967db2b8"
     },
     "stringi": {
       "Package": "stringi",
