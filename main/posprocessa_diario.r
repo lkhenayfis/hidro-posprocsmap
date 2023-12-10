@@ -76,7 +76,7 @@ main <- function(arq_conf) {
 
     CONF <- le_conf_posproc_diario(arq_conf, !interactive(), !interactive())
 
-    file.copy(arq_conf, file.path(CONF$OUTDIR, "conf_echo.jsonc"))
+    file.copy(arq_conf, file.path(CONF$OUTDIR, "conf_echo.jsonc"), overwrite = TRUE)
 
     # EXECUCAO PRINCIPAL -------------------------------------------------
 
