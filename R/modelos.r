@@ -178,13 +178,17 @@ GAM <- function(erros, vazoes, previstos, assimilados,
 
 BOOST_REG <- function(erros, vazoes, previstos, assimilados,
     janela, passo, n.ahead, refit.cada,
-    formula = Y ~ ., mstop = 2000, lags_erro = seq(10), family = "Gaussian", ...) {
+    formula = Y ~ ., mstop = 2000, family = "Gaussian",
+    lags_erro = seq(10), horizontes = c("atual", "todos"), ...) {
 
     formula <- as.formula(formula)
 
     family <- eval(parse(text = paste0("mboost::", family, "()")))
 
-    aux <- prepara_dados(previstos, assimilados, erros, lags_erro, unique(erros$dia_previsao))
+    hors <- match.arg(horizontes)
+    hors <- if (hors == "todos") unique(erros$dia_previsao) else max(erros$dia_previsao)
+
+    aux <- prepara_dados(previstos, assimilados, erros, lags_erro, hors)
     scales  <- aux[[1]]
     regdata <- aux[[2]]
     serie   <- aux[[3]]
