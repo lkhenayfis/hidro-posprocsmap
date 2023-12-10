@@ -140,11 +140,11 @@ main <- function(arq_conf) {
         if (CONF$PARALLEL$doparallel) {
             plan(multicore, workers = CONF$PARALLEL$nthreads)
             void <- future_sapply(inner_index_loop, function(v) {
-                INNER_EXEC(v[[1]], v[[2]], mod_i, erros, vaz, prev, assm, elem_i, CONF)
+                try(INNER_EXEC(v[[1]], v[[2]], mod_i, erros, vaz, prev, assm, elem_i, CONF))
             })
         } else {
             void <- lapply(inner_index_loop, function(v) {
-                INNER_EXEC(v[[1]], v[[2]], mod_i, erros, vaz, prev, assm, elem_i, CONF)
+                try(INNER_EXEC(v[[1]], v[[2]], mod_i, erros, vaz, prev, assm, elem_i, CONF))
             })
         }
     }
