@@ -66,3 +66,55 @@ aplica_subset <- function(dat, subset, col_datahora = "data_hora") {
 
     return(dat)
 }
+
+#' Agregacao Semanal De Observados
+#' 
+#' Agrega um dado de observados em valores semanais
+#' 
+#' @param vazoes dado de observados lido do banco
+
+agrega_semanal_vazoes <- function(vazoes) {
+
+    vaz_sem <- copy(vazoes)
+    vaz_sem[, semana := rep(seq_len(.N / 7), each = 7)]
+    vaz_sem <- vaz_sem[,
+        .(
+            "vazao" = mean(vazao),
+            "data" = data[1]
+        ),
+        by = semana
+    ][, -1]
+}
+
+#' Agregacao Semana De Previsoes
+#' 
+#' Agrega um dado de previsoes em valores semanais
+#' 
+#' @param previstos dado de previstos lido do banco
+
+agrega_semanal_previstos <- function(previstos) {
+
+    prev_sem <- copy(previstos)
+
+    nsems <- (max(prev_sem$dia_previsao) - 1) / 7
+
+    setorder(prev_sem, data_execucao, dia_previsao)
+    prev_sem[, tira := .N != 7 * max(nsems), by = data_execucao]
+    prev_sem <- prev_sem[tira == FALSE]
+
+    vsems <- rep(seq_len(nsems), each = 7)
+    prev_sem[, semana_previsao := rep(sems, length.out = .N)]
+
+    prev_sem <- prev_sem[,
+        .(
+            "data_previsao" = data_previsao[1],
+            "precipitacao" = sum(precipitacao),
+            "vazao" = mean(vazao)
+        ),
+        by = .(data_execucao, semana_previsao)
+    ]
+
+    prev_sem <- prev_sem[wday(data_previsao) == 7]
+
+    return(prev_sem)
+}
