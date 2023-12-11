@@ -176,17 +176,43 @@ GAM <- function(erros, vazoes, previstos, assimilados,
 
 # BOOST DE MODELOS ADITIVOS ------------------------------------------------------------------------
 
+process_formula <- function(form_string, lags_erro, hors) {
+
+    quaishor <- regmatches(form_string, regexpr("_\\$(H|h)_", form_string))
+    if (length(quaishor) == 0) {
+        form_hors <- ""
+    } else if (quaishor == "_$H_") form_hors <- hors else form_hors <- max(hors) 
+
+    quaislag <- regmatches(form_string, regexpr("_\\$L[[:digit:]]{1-2}", form_string))
+    if (length(quaislag) == 0) {
+        form_lags <- ""
+    } else if (quaislag == "_$L") {
+        form_lags <- lags_erro
+    } else {
+        lags <- as.numeric(sub("_\\$L", "", quaislag))
+        form_lags <- seq_len(lags)
+    }
+
+    aux <- outer(form_hors, form_lags, function(h, l) paste0("h_", h, "_l_", l))
+    aux <- paste0(aux, collapse = " + ")
+    out <- sub("h_\\$(H|h)_l_\\$L[[:digit:]]*", aux, form_string)
+    out <- paste0("Y ", out)
+    out <- as.formula(out)
+
+    return(out)
+}
+
 BOOST_REG <- function(erros, vazoes, previstos, assimilados,
     janela, passo, n.ahead, refit.cada,
-    formula = Y ~ ., mstop = 2000, family = "Gaussian",
+    formula = "~ .", mstop = 2000, family = "Gaussian",
     lags_erro = seq(10), horizontes = c("atual", "todos"), ...) {
-
-    formula <- as.formula(formula)
 
     family <- eval(parse(text = paste0("mboost::", family, "()")))
 
     hors <- match.arg(horizontes)
     hors <- if (hors == "todos") unique(erros$dia_previsao) else max(erros$dia_previsao)
+
+    formula <- process_formula(formula, lags_erro, hors)
 
     aux <- prepara_dados(previstos, assimilados, erros, lags_erro, hors)
     scales  <- aux[[1]]
