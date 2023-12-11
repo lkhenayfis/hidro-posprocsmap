@@ -70,6 +70,91 @@ ARMA <- function(erros, vazoes, previstos, assimilados,
 
 # MODELOS GAM --------------------------------------------------------------------------------------
 
+GAM <- function(erros, vazoes, previstos, assimilados,
+    janela, passo, n.ahead, refit.cada,
+    formula, lags_erro = seq(10), ...) {
+
+    formula <- as.formula(formula)
+
+    aux <- prepara_dados(previstos, assimilados, erros, lags_erro, max(erros$dia_previsao))
+    scales  <- aux[[1]]
+    regdata <- aux[[2]]
+    serie   <- aux[[3]]
+    
+    # Para facilitar a especificacao de formula pelo json, renomeia as colunas de lag de erro
+    colnames(regdata) <- sub("h_([[:digit:]]+)_l_([[:digit:]]+)", "l_\\2", colnames(regdata))
+
+    jm <- janelamovel(serie, "GAM", janela, passo, n.ahead, refit.cada,
+        regdata = regdata, formula = formula, ...)
+    
+    jm <- lapply(jm, function(j) {
+        j[, 1] <- j[, 1] * scales$erro[[2]][2] + scales$erro[[2]][1]
+        j
+    })
+
+    return(jm)
+}
+
+# BOOST DE MODELOS REGRESSIVOS ---------------------------------------------------------------------
+
+BOOST_REG <- function(erros, vazoes, previstos, assimilados,
+    janela, passo, n.ahead, refit.cada,
+    formula = "~ .", mstop = 2000, family = "Gaussian",
+    lags_erro = seq(10), horizontes = c("atual", "todos"), ...) {
+
+    hors <- match.arg(horizontes)
+    hors <- if (hors == "todos") unique(erros$dia_previsao) else max(erros$dia_previsao)
+
+    formula <- process_formula(formula, lags_erro, hors)
+
+    aux <- prepara_dados(previstos, assimilados, erros, lags_erro, hors)
+    scales  <- aux[[1]]
+    regdata <- aux[[2]]
+    serie   <- aux[[3]]
+
+    # tira o perfil de previsao -- causa algumas instabilidades e tambem nao sera usado no 
+    # operacional
+    regdata <- regdata[, .SD, .SDcols = -paste0("h", unique(erros$dia_previsao))]
+
+    jm <- janelamovel(serie, "BOOST", janela, passo, n.ahead, refit.cada,
+        regdata = regdata, family = family, control = mboost::boost_control(mstop = mstop), ...)
+
+    jm <- lapply(jm, function(j) {
+        j[, 1] <- j[, 1] * scales$erro[[2]][2] + scales$erro[[2]][1]
+        j
+    })
+
+    return(jm)
+}
+
+# AUXILIARES ---------------------------------------------------------------------------------------
+
+process_formula <- function(form_string, lags_erro, hors) {
+
+    quaishor <- regmatches(form_string, regexpr("_\\$(H|h)_", form_string))
+    if (length(quaishor) == 0) {
+        form_hors <- ""
+    } else if (quaishor == "_$H_") form_hors <- hors else form_hors <- max(hors) 
+
+    quaislag <- regmatches(form_string, regexpr("_\\$L[[:digit:]]{1-2}", form_string))
+    if (length(quaislag) == 0) {
+        form_lags <- ""
+    } else if (quaislag == "_$L") {
+        form_lags <- lags_erro
+    } else {
+        lags <- as.numeric(sub("_\\$L", "", quaislag))
+        form_lags <- seq_len(lags)
+    }
+
+    aux <- outer(form_hors, form_lags, function(h, l) paste0("h_", h, "_l_", l))
+    aux <- paste0(aux, collapse = " + ")
+    out <- sub("h_\\$(H|h)_l_\\$L[[:digit:]]*", aux, form_string)
+    out <- paste0("Y ", out)
+    out <- as.formula(out)
+
+    return(out)
+}
+
 process_previstos <- function(previstos) {
     max_hor <- max(previstos$dia_previsao)
     previstos <- copy(previstos)
@@ -110,7 +195,7 @@ process_lags_erro <- function(erros, lags, hors) {
     return(out)
 }
 
-process_regs_gam <- function(previstos, assimilados, erros, lags, hors, ...) {
+process_regs <- function(previstos, assimilados, erros, lags, hors, ...) {
 
     previstos <- process_previstos(previstos)
     lags_erro <- process_lags_erro(erros, lags, hors)
@@ -125,7 +210,7 @@ process_regs_gam <- function(previstos, assimilados, erros, lags, hors, ...) {
 }
 
 prepara_dados <- function(previstos, assimilados, erros, lags, hors, ...) {
-    varex   <- process_regs_gam(previstos, assimilados, erros, lags, hors)
+    varex   <- process_regs(previstos, assimilados, erros, lags, hors)
     regdata <- merge(
         erros[dia_previsao == max(dia_previsao), .(data, erro)],
         varex,
@@ -147,87 +232,4 @@ prepara_dados <- function(previstos, assimilados, erros, lags, hors, ...) {
 
     out <- list(scales, regdata, serie)
     return(out)
-}
-
-GAM <- function(erros, vazoes, previstos, assimilados,
-    janela, passo, n.ahead, refit.cada,
-    formula, lags_erro = seq(10), ...) {
-
-    formula <- as.formula(formula)
-
-    aux <- prepara_dados(previstos, assimilados, erros, lags_erro, max(erros$dia_previsao))
-    scales  <- aux[[1]]
-    regdata <- aux[[2]]
-    serie   <- aux[[3]]
-    
-    # Para facilitar a especificacao de formula pelo json, renomeia as colunas de lag de erro
-    colnames(regdata) <- sub("h_([[:digit:]]+)_l_([[:digit:]]+)", "l_\\2", colnames(regdata))
-
-    jm <- janelamovel(serie, "GAM", janela, passo, n.ahead, refit.cada,
-        regdata = regdata, formula = formula, ...)
-    
-    jm <- lapply(jm, function(j) {
-        j[, 1] <- j[, 1] * scales$erro[[2]][2] + scales$erro[[2]][1]
-        j
-    })
-
-    return(jm)
-}
-
-# BOOST DE MODELOS ADITIVOS ------------------------------------------------------------------------
-
-process_formula <- function(form_string, lags_erro, hors) {
-
-    quaishor <- regmatches(form_string, regexpr("_\\$(H|h)_", form_string))
-    if (length(quaishor) == 0) {
-        form_hors <- ""
-    } else if (quaishor == "_$H_") form_hors <- hors else form_hors <- max(hors) 
-
-    quaislag <- regmatches(form_string, regexpr("_\\$L[[:digit:]]{1-2}", form_string))
-    if (length(quaislag) == 0) {
-        form_lags <- ""
-    } else if (quaislag == "_$L") {
-        form_lags <- lags_erro
-    } else {
-        lags <- as.numeric(sub("_\\$L", "", quaislag))
-        form_lags <- seq_len(lags)
-    }
-
-    aux <- outer(form_hors, form_lags, function(h, l) paste0("h_", h, "_l_", l))
-    aux <- paste0(aux, collapse = " + ")
-    out <- sub("h_\\$(H|h)_l_\\$L[[:digit:]]*", aux, form_string)
-    out <- paste0("Y ", out)
-    out <- as.formula(out)
-
-    return(out)
-}
-
-BOOST_REG <- function(erros, vazoes, previstos, assimilados,
-    janela, passo, n.ahead, refit.cada,
-    formula = "~ .", mstop = 2000, family = "Gaussian",
-    lags_erro = seq(10), horizontes = c("atual", "todos"), ...) {
-
-    hors <- match.arg(horizontes)
-    hors <- if (hors == "todos") unique(erros$dia_previsao) else max(erros$dia_previsao)
-
-    formula <- process_formula(formula, lags_erro, hors)
-
-    aux <- prepara_dados(previstos, assimilados, erros, lags_erro, hors)
-    scales  <- aux[[1]]
-    regdata <- aux[[2]]
-    serie   <- aux[[3]]
-
-    # tira o perfil de previsao -- causa algumas instabilidades e tambem nao sera usado no 
-    # operacional
-    regdata <- regdata[, .SD, .SDcols = -paste0("h", unique(erros$dia_previsao))]
-
-    jm <- janelamovel(serie, "BOOST", janela, passo, n.ahead, refit.cada,
-        regdata = regdata, family = family, control = mboost::boost_control(mstop = mstop), ...)
-
-    jm <- lapply(jm, function(j) {
-        j[, 1] <- j[, 1] * scales$erro[[2]][2] + scales$erro[[2]][1]
-        j
-    })
-
-    return(jm)
 }
