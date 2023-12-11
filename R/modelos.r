@@ -136,10 +136,6 @@ BOOST_REG <- function(erros, vazoes, previstos, assimilados,
     regdata <- aux[[2]]
     serie   <- aux[[3]]
 
-    # tira o perfil de previsao -- causa algumas instabilidades e tambem nao sera usado no 
-    # operacional
-    regdata <- regdata[, .SD, .SDcols = -paste0("h", unique(erros$dia_previsao))]
-
     jm <- janelamovel(serie, "BOOST", janela, passo, n.ahead, refit.cada,
         regdata = regdata, family = family, control = mboost::boost_control(mstop = mstop), ...)
 
@@ -230,6 +226,10 @@ process_regs <- function(previstos, assimilados, erros, lags, hors, ...) {
 
     varex <- merge(previstos, lags_erro, by = "data_execucao")
     varex <- merge(varex, assimilados, by.x = "data_execucao", by.y = "data")
+    
+    # tira o perfil de previsao -- causa algumas instabilidades e tambem nao sera usado no 
+    # operacional
+    varex <- varex[, .SD, .SDcols = -paste0("h", unique(erros$dia_previsao))]
 
     setcolorder(varex, c("max_data_previsao", "data_execucao"))
 
