@@ -996,7 +996,7 @@
       "RemoteRepo": "modprev",
       "RemoteUsername": "lkhenayfis",
       "RemoteRef": "modboost",
-      "RemoteSha": "0ee7749dea131ac01b8e7d8cf191445aefc88201",
+      "RemoteSha": "30ced199ced99768b841654f4ea59ee54e3358d3",
       "Requirements": [
         "KFAS",
         "R",
@@ -1006,7 +1006,7 @@
         "quantreg",
         "stats"
       ],
-      "Hash": "067a2403a37ce1f7509dd2fb3046474c"
+      "Hash": "16c1695d22228e8e4df2bce0d5d7fbfb"
     },
     "munsell": {
       "Package": "munsell",
@@ -1528,7 +1528,7 @@
     },
     "vctrs": {
       "Package": "vctrs",
-      "Version": "0.6.2",
+      "Version": "0.6.5",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1538,7 +1538,7 @@
         "lifecycle",
         "rlang"
       ],
-      "Hash": "a745bda7aff4734c17294bb41d4e4607"
+      "Hash": "c03fa420630029418f7e6da3667aac4a"
     },
     "viridisLite": {
       "Package": "viridisLite",
