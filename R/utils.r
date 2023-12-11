@@ -95,16 +95,13 @@ agrega_semanal_vazoes <- function(vazoes) {
 agrega_semanal_previstos <- function(previstos) {
 
     prev_sem <- copy(previstos)
+    prev_sem <- prev_sem[wday(data_execucao) == 5]
 
     nsems <- (max(prev_sem$dia_previsao) - 1) / 7
-
-    setorder(prev_sem, data_execucao, dia_previsao)
-    prev_sem[, tira := .N != 7 * max(nsems), by = data_execucao]
-    prev_sem <- prev_sem[tira == FALSE]
-
     vsems <- rep(seq_len(nsems), each = 7)
-    prev_sem[, semana_previsao := rep(sems, length.out = .N)]
 
+    aux <- data.table(dia_previsao = seq_len(nsems * 7 + 1)[-1], semana_previsao = vsems)
+    prev_sem <- merge(prev_sem, aux)
     prev_sem <- prev_sem[,
         .(
             "data_previsao" = data_previsao[1],
@@ -113,8 +110,6 @@ agrega_semanal_previstos <- function(previstos) {
         ),
         by = .(data_execucao, semana_previsao)
     ]
-
-    prev_sem <- prev_sem[wday(data_previsao) == 7]
 
     return(prev_sem)
 }
