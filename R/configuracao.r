@@ -12,7 +12,7 @@ le_conf_posproc_diario <- function(arq_conf, log = FALSE, print = FALSE, early =
     CONF <- jsonlite::read_json(arq_conf, TRUE)
 
     if (print) cat(paste0("\n", prettyprint(CONF), "\n"))
-    if (log) log_print(prettyprint(CONF), console = FALSE)
+    if (log) log_print(cat(paste0("\n", prettyprint(CONF), "\n")), console = FALSE)
 
     # OUTDIR -------------------------------------------------------------
 
