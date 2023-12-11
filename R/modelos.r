@@ -68,6 +68,30 @@ ARMA <- function(erros, vazoes, previstos, assimilados,
     return(jm)
 }
 
+ARMAX <- function(erros, vazoes, previstos, assimilados,
+    janela, passo, n.ahead, refit.cada, formula = "~ .", ...) {
+
+    formula <- as.formula(formula)
+
+    aux <- prepara_dados(previstos, assimilados, erros, 1, max(erros$dia_previsao))
+    scales  <- aux[[1]]
+    regdata <- aux[[2]]
+    serie   <- aux[[3]]
+    
+    # Para facilitar a especificacao de formula pelo json, renomeia as colunas de lag de erro
+    colnames(regdata) <- sub("h_([[:digit:]]+)_l_([[:digit:]]+)", "l_\\2", colnames(regdata))
+
+    jm <- janelamovel(serie, "sarimax", janela, passo, n.ahead, refit.cada,
+        allowdrift = FALSE, formula = formula, regdata = regdata, ...)
+
+    jm <- lapply(jm, function(j) {
+        j[, 1] <- j[, 1] * scales$erro[[2]][2] + scales$erro[[2]][1]
+        j
+    })
+
+    return(jm)
+}
+
 # MODELOS GAM --------------------------------------------------------------------------------------
 
 GAM <- function(erros, vazoes, previstos, assimilados,
@@ -159,6 +183,9 @@ process_previstos <- function(previstos) {
     max_hor <- max(previstos$dia_previsao)
     previstos <- copy(previstos)
 
+    refdatas <- previstos[dia_previsao == max(dia_previsao),
+        .(data_execucao, max_data_previsao = data_previsao)]
+
     # acumula apenas as previsoes com trajeto completo
     acumulados <- previstos[, .("acumulado" = ifelse(.N == max_hor, sum(precipitacao), NA_real_)),
         by = .(data_execucao)]
@@ -172,7 +199,7 @@ process_previstos <- function(previstos) {
     colnames(previstos)[-1] <- paste0("h", colnames(previstos)[-1])
 
     previstos <- merge(previstos, acumulados)
-    previstos[, max_data_previsao := data_execucao + max_hor]
+    previstos <- merge(previstos, refdatas)
 
     return(previstos)
 }
