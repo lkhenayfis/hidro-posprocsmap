@@ -207,8 +207,6 @@ BOOST_REG <- function(erros, vazoes, previstos, assimilados,
     formula = "~ .", mstop = 2000, family = "Gaussian",
     lags_erro = seq(10), horizontes = c("atual", "todos"), ...) {
 
-    family <- eval(parse(text = paste0("mboost::", family, "()")))
-
     hors <- match.arg(horizontes)
     hors <- if (hors == "todos") unique(erros$dia_previsao) else max(erros$dia_previsao)
 
