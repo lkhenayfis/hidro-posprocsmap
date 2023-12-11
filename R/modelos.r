@@ -137,7 +137,8 @@ BOOST_REG <- function(erros, vazoes, previstos, assimilados,
     serie   <- aux[[3]]
 
     jm <- janelamovel(serie, "BOOST", janela, passo, n.ahead, refit.cada,
-        regdata = regdata, family = family, control = mboost::boost_control(mstop = mstop), ...)
+        formula = formula, regdata = regdata, family = family,
+        control = mboost::boost_control(mstop = mstop), ...)
 
     jm <- lapply(jm, function(j) {
         j[, 1] <- j[, 1] * scales$erro[[2]][2] + scales$erro[[2]][1]
