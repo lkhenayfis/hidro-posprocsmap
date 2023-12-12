@@ -130,14 +130,15 @@ BOOST_REG <- function(erros, vazoes, previstos, assimilados,
     hors <- if (hors == "todos") unique(erros$dia_previsao) else max(erros$dia_previsao)
 
     formula <- process_formula(formula, lags_erro, hors)
+    usevars <- strsplit(as.character(formula)[3], " \\+ ")[[1]]
 
     aux <- prepara_dados(previstos, assimilados, erros, lags_erro, hors)
     scales  <- aux[[1]]
-    regdata <- aux[[2]]
+    regdata <- aux[[2]][, .SD, .SDcols = usevars]
     serie   <- aux[[3]]
 
     jm <- janelamovel(serie, "BOOST", janela, passo, n.ahead, refit.cada,
-        formula = formula, regdata = regdata, family = family,
+        regdata = regdata, family = family,
         control = mboost::boost_control(mstop = mstop), ...)
 
     jm <- lapply(jm, function(j) {
