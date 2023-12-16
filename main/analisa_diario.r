@@ -87,9 +87,11 @@ main <- function(arq_conf) {
 
         lineplot <- ggplot(dplot, aes(data, erro, color = id_modelo_correcao)) +
             geom_line() +
-            scale_color_manual(values = cores) +
+            scale_color_manual(values = cores, name = "") +
+            labs(x = "Data", y = "Valor") +
             facet_wrap(~ year(data), ncol = 1, scales = "free") +
-            theme_bw()
+            theme_bw() +
+            theme(text = element_text(size = 16))
         arq_lineplot <- index_loop[i, paste0(c(elem, mod, hor, "lineplot"), collapse = "_")]
         ggsave(file.path(CONF$OUTDIR, paste0(arq_lineplot, ".jpeg")), lineplot,
             width = 16, height = 9)
@@ -127,8 +129,10 @@ main <- function(arq_conf) {
         scale_fill_manual(values = cores[-1]) +
         scale_y_continuous(breaks = seq(0, 5, .2), minor_breaks = seq(.1, 5, .2)) +
         coord_cartesian(ylim = c(0, 1.3)) +
-        facet_wrap(~ usina + modelo) +
-        theme_bw() + theme(legend.position = "bottom")
+        facet_wrap(~ usina) +
+        labs(x = "Horizonte (dias)", y = "MSE") +
+        theme_bw() +
+        theme(legend.position = "bottom", text = element_text(size = 16))
     ggsave(file.path(CONF$OUTDIR, "barplot.jpeg"), barplot, width = 16, height = 9)
 
     # Barplot por usina com MSE decomposto -------------------------------
@@ -143,8 +147,10 @@ main <- function(arq_conf) {
             scale_fill_manual(values = cores) +
             scale_y_continuous(breaks = seq(0, 5, .2), minor_breaks = seq(.1, 5, .2)) +
             coord_cartesian(ylim = c(0, 1.3)) +
-            facet_grid(metrica ~ usina + modelo) +
-            theme_bw() + theme(legend.position = "bottom")
+            facet_grid(metrica ~ usina) +
+            labs(x = "Horizonte (dias)", y = "MSE") +
+            theme_bw() +
+            theme(legend.position = "bottom", text = element_text(size = 16))
         arq_barplot <- paste0(c(dat$usina[1], dat$modelo[1], "barplot"), collapse = "_")
         ggsave(file.path(CONF$OUTDIR, paste0(arq_barplot, ".jpeg")), barplot, width = 16, height = 9)
     }
